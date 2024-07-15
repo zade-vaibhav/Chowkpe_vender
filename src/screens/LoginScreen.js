@@ -7,10 +7,10 @@ const { width, height } = Dimensions.get('window');
 const LoginScreen = ({navigation}) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isValid, setIsValid] = useState(false);
-  const [phoneInputWidth, setPhoneInputWidth] = useState(width); // Default to full width
+  const [phoneInputWidth, setPhoneInputWidth] = useState(width); 
 
   const handlePhoneNumberChange = ({ phoneNumber, dialCode, unmaskedPhoneNumber, isVerified }) => {
-    const cleanedPhoneNumber = phoneNumber.replace(/\s+/g, ""); // Remove any spaces
+    const cleanedPhoneNumber = phoneNumber.replace(/\s+/g, ""); 
     setPhoneNumber(cleanedPhoneNumber);
     const phoneRegex = /^\+\d{1,3}\d{11}$/;
     if (phoneRegex.test(dialCode + unmaskedPhoneNumber)) {

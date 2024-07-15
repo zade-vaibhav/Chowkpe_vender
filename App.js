@@ -5,6 +5,7 @@ import { TransitionPresets, createStackNavigator } from '@react-navigation/stack
 import Welcome from "./src/screens/Welcome";
 import LoginScreen from "./src/screens/LoginScreen";
 import OtpScreen from "./src/screens/OtpScreen";
+import CategoryScreen from "./src/screens/CategoryScreen";
 
 const Stack = createStackNavigator();
 
@@ -34,6 +35,13 @@ export default function App() {
           options={{ ...TransitionPresets.DefaultTransition }}
         />
          <Stack.Screen name="OtpNew" component={OtpScreen} />
+         <Stack.Screen name="Select Category" component={CategoryScreen}   
+        //  options={{
+        //     headerShown: true,
+        //     headerTitle: "Select Category",
+        //     headerTitleAlign: "center",
+        //   }}
+          />
       </Stack.Navigator>
     </NavigationContainer>
   );

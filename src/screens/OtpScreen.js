@@ -15,7 +15,7 @@ import {
 
 const { width, height } = Dimensions.get('window');
 
-const OtpScreen = () => {
+const OtpScreen = ({navigation}) => {
   const [otp, setOtp] = useState(["", "", "", ""]);
 
   const handleOtpChange = (index, value) => {
@@ -32,6 +32,10 @@ const OtpScreen = () => {
   const otpInputsRefs = useRef([]);
   
   const isOtpComplete = otp.every(digit => digit.length === 1);
+
+  const handleVerify = ()=>{
+    navigation.navigate('Select Category')
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -78,6 +82,7 @@ const OtpScreen = () => {
             <TouchableOpacity
               style={[styles.verifyButton, { backgroundColor: isOtpComplete ? "#007BFF" : "#ccc" }]}
               disabled={!isOtpComplete}
+              onPress={handleVerify}
             >
               <Text style={styles.verifyButtonText}>Verify</Text>
             </TouchableOpacity>
