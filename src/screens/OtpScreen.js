@@ -34,7 +34,7 @@ const OtpScreen = ({navigation}) => {
   const isOtpComplete = otp.every(digit => digit.length === 1);
 
   const handleVerify = ()=>{
-    navigation.navigate('Select Category')
+    navigation.navigate('BottomNavigator')
   }
 
   return (
