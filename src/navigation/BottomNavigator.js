@@ -25,7 +25,6 @@ const ProfileScreen = () => (
 
 const BottomNavigtor = () => {
   return (
-    
       <Tab.Navigator
         initialRouteName="Home"
         screenOptions={({ route }) => ({

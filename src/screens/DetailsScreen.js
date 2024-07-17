@@ -7,40 +7,70 @@ import {
   ScrollView,
   Image,
   TextInput,
+  Alert
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
-import * as ImagePicker from 'expo-image-picker';
-import * as DocumentPicker from 'expo-document-picker';
+import * as ImagePicker from "expo-image-picker";
+import * as DocumentPicker from "expo-document-picker";
+
+const RequestCallbackBox = () => {
+  return (
+    <View style={styles.section}>
+      <View style={styles.requestCallbackBox}>
+        <TouchableOpacity style={styles.phoneButton}>
+          <Icon name="call" size={24} color="#fff" />
+        </TouchableOpacity>
+        <Text style={styles.requestButtonText}>Request Callback</Text>
+      </View>
+    </View>
+  );
+};
+
+const HeadingBox = (props) => {
+  return (
+    <View style={styles.messageBox}>
+      <Image
+        source={require("../../assets/chowkpe.png")}
+        style={styles.logoImage}
+      />
+      <Text style={styles.sectionText}>{props.name}</Text>
+      <Text style={styles.dateText}>25 Jan 24</Text>
+    </View>
+  );
+};
 
 const DetailsScreen = ({ navigation }) => {
   const [workType, setWorkType] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
   const [location, setLocation] = useState("");
-  const [workers, setWorkers] = useState(null)
-  const [description, setDescription] = useState("")
+  const [workers, setWorkers] = useState(null);
+  const [description, setDescription] = useState("");
   const [selectedImage, setSelectedImage] = useState(null);
-  const [salary, setSalary] = useState(null)
-  const [pf, setPf] = useState(null)
-  const [esi, setEsi] = useState(null)
-  const [food, setFood] = useState(null)
-  const [accomodation, setAccomodation] = useState(null)
-  
+  const [salary, setSalary] = useState(null);
+  const [pf, setPf] = useState(null);
+  const [esi, setEsi] = useState(null);
+  const [food, setFood] = useState(null);
+  const [accomodation, setAccomodation] = useState(null);
 
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const [dropdownVisibleDocument, setDropdownVisibleDocument] = useState(false);
   const [dropdownVisibleCategory, setDropdownVisibleCategory] = useState(false);
   const [selectedItem, setSelectedItem] = useState("Select Starting Date");
-  const [selectedDocument, setSelectedDocument] = useState('Select Document');
-  const [selectedCategory, setSelectedCategory] = useState('Select Category');
-  
- 
-  const [address, setAddress] = useState(null);
-  const [desc, setDesc] = useState(null)
-  const [salaryRange, setSalaryRange] = useState(null)
-  const dates = ["Immediately", "Within 10 Days", "Within 15 days", "Within 1 month"];
-  const requiredDocuments = ['ID Proof', 'Address Proof'];
-  const hireCategories = ['Cleaning', 'Shipping'];
+  const [selectedDocument, setSelectedDocument] = useState("Select Document");
+  const [selectedCategory, setSelectedCategory] = useState("Select Category");
 
+  const [workerNumber, setWorkerNumber] = useState("");
+  const [address, setAddress] = useState("");
+  const [desc, setDesc] = useState("");
+  const [salaryRange, setSalaryRange] = useState("");
+  const dates = [
+    "Immediately",
+    "Within 10 Days",
+    "Within 15 days",
+    "Within 1 month",
+  ];
+  const requiredDocuments = ["ID Proof", "Address Proof"];
+  const hireCategories = ["Cleaning", "Shipping"];
 
   const toggleDropdown = () => {
     setDropdownVisible(!dropdownVisible);
@@ -77,31 +107,37 @@ const DetailsScreen = ({ navigation }) => {
     }
   };
 
-  const handleAddDescription = ()=>{
-    if(description.trim()){
-      setDesc(description)
+  const handleWorkersNumber = () => {
+    if (workers.trim()) {
+      setWorkerNumber(workers);
+      setWorkers("");
+    }
+  };
+
+  const handleAddDescription = () => {
+    if (description.trim()) {
+      setDesc(description);
       setDescription("");
     }
-  }
+  };
 
-  const handleSalaryRange =()=>{
-    if(salary.trim()){
+  const handleSalaryRange = () => {
+    if (salary.trim()) {
       setSalaryRange(salary);
       setSalary("");
     }
-  }
+  };
 
   const openCamera = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== 'granted') {
-      alert('Sorry, we need camera permissions to make this work!');
+    if (status !== "granted") {
+      alert("Sorry, we need camera permissions to make this work!");
       return;
     }
 
     const result = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      // aspect: [4, 3],
       quality: 1,
     });
 
@@ -114,7 +150,6 @@ const DetailsScreen = ({ navigation }) => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      // aspect: [4, 3],
       quality: 1,
     });
 
@@ -123,23 +158,75 @@ const DetailsScreen = ({ navigation }) => {
     }
   };
 
-  const isSubmitEnabled = () => {
-    return (
-      workers !== "" &&
-      description !== "" &&
-      selectedImage !== null &&
-      selectedDocument !== "" &&
-      selectedCategory !== "" &&
-      salary !== "" &&
-      pf !== "" &&
-      esi !== "" &&
-      food !== "" &&
-      accommodation !== ""
-    );
-  };
-
-
   const handleSubmit = () => {
+    if (!workType) {
+      Alert.alert("Please select a work type.");
+      return;
+    }
+    if (!selectedDate) {
+      Alert.alert("Please select a starting date.");
+      return;
+    }
+    if (!address.trim()) {
+      Alert.alert("Please enter a location.");
+      return;
+    }
+     if (address.trim().length < 10) { 
+    Alert.alert("Please enter a valid location with at least 10 characters.");
+    return;
+  }
+    if (!workerNumber.trim()) {
+      Alert.alert("Please enter a worker Number.");
+      return;
+    }
+    if (isNaN(workerNumber) || parseInt(workerNumber) < 1) {
+      Alert.alert("Please enter a valid worker number (1 or greater).");
+      return;
+    }
+    if (!desc.trim()) {
+      Alert.alert("Please enter work description.");
+      return;
+    }
+    if (desc.trim().length < 10) { 
+      Alert.alert("Please enter a valid work description with at least 10 characters.");
+      return;
+    }
+    if (!selectedImage) {
+      Alert.alert("Please select an image.");
+      return;
+    }
+    if (!selectedDocument || selectedDocument === "Select Document") {
+      Alert.alert("Please select a required document.");
+      return;
+    }
+    if (!selectedCategory || selectedCategory === "Select Category") {
+      Alert.alert("Please select a hire category.");
+      return;
+    }
+    if (!salaryRange.trim()) {
+      Alert.alert("Please select salary range.");
+      return;
+    }
+    if (isNaN(salaryRange) || parseInt(salaryRange) < 1000) {
+      Alert.alert("Please enter a valid Salary range  (1000 or greater).");
+      return;
+    }
+    if (!pf) {
+      Alert.alert("Please select PF confimation.");
+      return;
+    }
+    if (!esi) {
+      Alert.alert("Please select ESI confimation.");
+      return;
+    }
+    if (!food) {
+      Alert.alert("Please select Food confimation.");
+      return;
+    }
+    if (!accomodation) {
+      Alert.alert("Please select accomodation confimation.");
+      return;
+    }
     console.log("Form submitted");
   };
 
@@ -151,7 +238,10 @@ const DetailsScreen = ({ navigation }) => {
       >
         <Icon name="arrow-back" size={24} color="black" />
       </TouchableOpacity>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContainer}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContainer}
+      >
         <View style={styles.imageContainer}>
           <Image
             source={require("../../assets/Forklifter.png")}
@@ -171,14 +261,7 @@ const DetailsScreen = ({ navigation }) => {
           <Text style={styles.dateText}>25 Jan 24</Text>
         </View>
         <View style={styles.section}>
-          <View style={styles.messageBox}>
-            <Image
-              source={require("../../assets/chowkpe.png")}
-              style={styles.logoImage}
-            />
-            <Text style={styles.sectionText}>Select Work Type</Text>
-            <Text style={styles.dateText}>25 Jan 24</Text>
-          </View>
+          <HeadingBox name="Select Work Type" />
           <View style={styles.buttonGroup}>
             <TouchableOpacity
               style={[
@@ -225,14 +308,7 @@ const DetailsScreen = ({ navigation }) => {
           )}
         </View>
         <View style={styles.section}>
-          <View style={styles.messageBox}>
-            <Image
-              source={require("../../assets/chowkpe.png")}
-              style={styles.logoImage}
-            />
-            <Text style={styles.sectionText}>Select Starting Date</Text>
-            <Text style={styles.dateText}>25 Jan 24</Text>
-          </View>
+          <HeadingBox name="Select Starting Date" />
           <TouchableOpacity
             style={styles.dropdownButton}
             onPress={toggleDropdown}
@@ -263,33 +339,16 @@ const DetailsScreen = ({ navigation }) => {
             </View>
           )}
         </View>
+        <RequestCallbackBox />
         <View style={styles.section}>
-          <View style={styles.requestCallbackBox}>
-          <TouchableOpacity style={styles.phoneButton}>
-              <Icon name="call" size={24} color="#fff" />
-           </TouchableOpacity>
-            <Text style={styles.requestButtonText}>Request Callback</Text>
-          </View>
-        </View>
-        <View style={styles.section}>
-        <View style={styles.messageBox}>
-            <Image
-              source={require("../../assets/chowkpe.png")}
-              style={styles.logoImage}
-            />
-            <Text style={styles.sectionText}>Enter your location</Text>
-            <Text style={styles.dateText}>25 Jan 24</Text>
-          </View>
+          <HeadingBox name="Enter your location" />
           <TextInput
             style={styles.input}
             value={location}
             onChangeText={setLocation}
             placeholder="Enter address"
           />
-          <TouchableOpacity
-            style={styles.addButton}
-            onPress={handleAddAddress}
-          >
+          <TouchableOpacity style={styles.addButton} onPress={handleAddAddress}>
             <Text style={styles.addButtonText}>Add</Text>
           </TouchableOpacity>
           {address && (
@@ -304,92 +363,36 @@ const DetailsScreen = ({ navigation }) => {
           )}
         </View>
         <View style={styles.section}>
-          <View style={styles.messageBox}>
-            <Image
-              source={require("../../assets/chowkpe.png")}
-              style={styles.logoImage}
-            />
-            <Text style={styles.sectionText}>How many workers do you need ?</Text>
-            <Text style={styles.dateText}>25 Jan 24</Text>
-          </View>
-          <View style={styles.buttonGroup}>
-            <TouchableOpacity
-              style={[
-                styles.button,
-                workers === "1 worker" && styles.selectedButton,
-              ]}
-              onPress={() => setWorkers("1 worker")}
-            >
-              <Text
-                style={[
-                  styles.buttonText,
-                  workers === "1 worker" && styles.selectedButtonText,
-                ]}
-              >
-                1 worker
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.button,
-                workers === "2 worker" && styles.selectedButton,
-              ]}
-              onPress={() => setWorkers("2 worker")}
-            >
-              <Text
-                style={[
-                  styles.buttonText,
-                  workers === "2 worker" && styles.selectedButtonText,
-                ]}
-              >
-                2 worker
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.button,
-                workers === "2 + worker" && styles.selectedButton,
-              ]}
-              onPress={() => setWorkers("2 + worker")}
-            >
-              <Text
-                style={[
-                  styles.buttonText,
-                  workers === "2 + worker" && styles.selectedButtonText,
-                ]}
-              >
-                2 + worker 
-              </Text>
-            </TouchableOpacity>
-          </View>
-          {workers && (
+          <HeadingBox name="How many workers do you need ?" />
+          <TextInput
+            style={styles.input}
+            value={workers}
+            onChangeText={setWorkers}
+            placeholder="eg-20"
+            keyboardType="numeric"
+          />
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={handleWorkersNumber}
+          >
+            <Text style={styles.addButtonText}>Add</Text>
+          </TouchableOpacity>
+          {workerNumber && (
             <View style={styles.selectedWorkTypeContainer}>
               <TouchableOpacity style={styles.editIconContainer}>
                 <Icon name="pencil" size={16} color="gray" />
               </TouchableOpacity>
               <View style={styles.workTypeTextContainer}>
-                <Text style={styles.selectedWorkTypeText}>{workers}</Text>
+                <Text style={styles.selectedWorkTypeText}>
+                  {workerNumber} {workerNumber <= 1 ? "Worker":"Workers"}
+                </Text>
               </View>
             </View>
           )}
         </View>
+        <RequestCallbackBox />
         <View style={styles.section}>
-          <View style={styles.requestCallbackBox}>
-          <TouchableOpacity style={styles.phoneButton}>
-              <Icon name="call" size={24} color="#fff" />
-           </TouchableOpacity>
-            <Text style={styles.requestButtonText}>Request Callback</Text>
-          </View>
-        </View>
-        <View style={styles.section}>
-        <View style={styles.messageBox}>
-            <Image
-              source={require("../../assets/chowkpe.png")}
-              style={styles.logoImage}
-            />
-            <Text style={styles.sectionText}>Write work description</Text>
-            <Text style={styles.dateText}>25 Jan 24</Text>
-          </View>
+          <HeadingBox name="Write work description" />
           <TextInput
             style={styles.input}
             value={description}
@@ -414,129 +417,99 @@ const DetailsScreen = ({ navigation }) => {
           )}
         </View>
         <View style={styles.section}>
-      <View style={styles.messageBox}>
-        <Image
-          source={require('../../assets/chowkpe.png')}
-          style={styles.logoImage}
-        />
-        <Text style={styles.sectionText}>Add Photos of your work</Text>
-        <Text style={styles.dateText}>25 Jan 24</Text>
-      </View>
-      <View style={styles.buttonGroup}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={openCamera}
-        >
-          <Text style={styles.buttonText}>Open Camera</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={openGallery}
-        >
-          <Text style={styles.buttonText}>Open Gallery</Text>
-        </TouchableOpacity>
-      </View>
-      {selectedImage && (
-        <View style={styles.selectedWorkTypeContainer}>
-          <TouchableOpacity style={styles.editIconContainer}>
-            <Icon name="pencil" size={16} color="gray" />
-          </TouchableOpacity>
-          <View style={styles.imageTypeContainer}>
-            <Image
-              source={{ uri: selectedImage }}
-              style={styles.selectedImage}
-            />
+          <HeadingBox name="Add Photos of your work" />
+          <View style={styles.buttonGroup}>
+            <TouchableOpacity style={styles.button} onPress={openCamera}>
+              <Text style={styles.buttonText}>Open Camera</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={openGallery}>
+              <Text style={styles.buttonText}>Open Gallery</Text>
+            </TouchableOpacity>
           </View>
+          {selectedImage && (
+            <View style={styles.selectedWorkTypeContainer}>
+              <TouchableOpacity style={styles.editIconContainer}>
+                <Icon name="pencil" size={16} color="gray" />
+              </TouchableOpacity>
+              <View style={styles.imageTypeContainer}>
+                <Image
+                  source={{ uri: selectedImage }}
+                  style={styles.selectedImage}
+                />
+              </View>
+            </View>
+          )}
         </View>
-      )}
-    </View>
-    <View style={styles.section}>
-  <View style={styles.messageBox}>
-    <Image
-      source={require('../../assets/chowkpe.png')}
-      style={styles.logoImage}
-    />
-    <Text style={styles.sectionText}>Select Required Documents</Text>
-    <Text style={styles.dateText}>25 Jan 24</Text>
-  </View>
-  <TouchableOpacity
-    style={styles.dropdownButton}
-    onPress={toggleDropdownDocument}
-  >
-    <Text style={styles.dropdownButtonText}>{selectedDocument}</Text>
-  </TouchableOpacity>
-  {dropdownVisibleDocument && (
-    <View style={styles.dropdown}>
-      {requiredDocuments.map((document, index) => (
-        <TouchableOpacity
-          key={index}
-          style={[
-            styles.dropdownItem,
-            selectedDocument === document && styles.selectedDropdownItem,
-          ]}
-          onPress={() => handleSelectDocument(document)}
-        >
-          <Text
-            style={[
-              styles.dropdownItemText,
-              selectedDocument === document && styles.selectedDropdownItemText,
-            ]}
+        <View style={styles.section}>
+          <HeadingBox name="Select Required Documents" />
+          <TouchableOpacity
+            style={styles.dropdownButton}
+            onPress={toggleDropdownDocument}
           >
-            {document}
-          </Text>
-        </TouchableOpacity>
-      ))}
-    </View>
-  )}
-</View>
-<View style={styles.section}>
-  <View style={styles.messageBox}>
-    <Image
-      source={require('../../assets/chowkpe.png')}
-      style={styles.logoImage}
-    />
-    <Text style={styles.sectionText}>Select Hire Category</Text>
-    <Text style={styles.dateText}>25 Jan 24</Text>
-  </View>
-  <TouchableOpacity
-    style={styles.dropdownButton}
-    onPress={toggleDropdownCategory}
-  >
-    <Text style={styles.dropdownButtonText}>{selectedCategory}</Text>
-  </TouchableOpacity>
-  {dropdownVisibleCategory && (
-    <View style={styles.dropdown}>
-      {hireCategories.map((category, index) => (
-        <TouchableOpacity
-          key={index}
-          style={[
-            styles.dropdownItem,
-            selectedCategory === category && styles.selectedDropdownItem,
-          ]}
-          onPress={() => handleSelectCategory(category)}
-        >
-          <Text
-            style={[
-              styles.dropdownItemText,
-              selectedCategory === category && styles.selectedDropdownItemText,
-            ]}
+            <Text style={styles.dropdownButtonText}>{selectedDocument}</Text>
+          </TouchableOpacity>
+          {dropdownVisibleDocument && (
+            <View style={styles.dropdown}>
+              {requiredDocuments.map((document, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={[
+                    styles.dropdownItem,
+                    selectedDocument === document &&
+                      styles.selectedDropdownItem,
+                  ]}
+                  onPress={() => handleSelectDocument(document)}
+                >
+                  <Text
+                    style={[
+                      styles.dropdownItemText,
+                      selectedDocument === document &&
+                        styles.selectedDropdownItemText,
+                    ]}
+                  >
+                    {document}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+        </View>
+        <View style={styles.section}>
+          <HeadingBox name="Select Hire Category" />
+          <TouchableOpacity
+            style={styles.dropdownButton}
+            onPress={toggleDropdownCategory}
           >
-            {category}
-          </Text>
-        </TouchableOpacity>
-      ))}
-    </View>
-  )}
-</View>
-    <View style={styles.section}>
-        <View style={styles.messageBox}>
-            <Image
-              source={require("../../assets/chowkpe.png")}
-              style={styles.logoImage}
-            />
-            <Text style={styles.sectionText}>Salary Range</Text>
-            <Text style={styles.dateText}>25 Jan 24</Text>
-          </View>
+            <Text style={styles.dropdownButtonText}>{selectedCategory}</Text>
+          </TouchableOpacity>
+          {dropdownVisibleCategory && (
+            <View style={styles.dropdown}>
+              {hireCategories.map((category, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={[
+                    styles.dropdownItem,
+                    selectedCategory === category &&
+                      styles.selectedDropdownItem,
+                  ]}
+                  onPress={() => handleSelectCategory(category)}
+                >
+                  <Text
+                    style={[
+                      styles.dropdownItemText,
+                      selectedCategory === category &&
+                        styles.selectedDropdownItemText,
+                    ]}
+                  >
+                    {category}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+        </View>
+        <View style={styles.section}>
+          <HeadingBox name="Salary Range"/>
           <TextInput
             style={styles.input}
             value={salary}
@@ -560,21 +533,11 @@ const DetailsScreen = ({ navigation }) => {
             </View>
           )}
         </View>
-    <View style={styles.section}>
-          <View style={styles.messageBox}>
-            <Image
-              source={require("../../assets/chowkpe.png")}
-              style={styles.logoImage}
-            />
-            <Text style={styles.sectionText}>PF</Text>
-            <Text style={styles.dateText}>25 Jan 24</Text>
-          </View>
+        <View style={styles.section}>
+          <HeadingBox name="PF"/>
           <View style={styles.buttonGroup}>
             <TouchableOpacity
-              style={[
-                styles.button,
-                pf === "Yes" && styles.selectedButton,
-              ]}
+              style={[styles.button, pf === "Yes" && styles.selectedButton]}
               onPress={() => setPf("Yes")}
             >
               <Text
@@ -587,10 +550,7 @@ const DetailsScreen = ({ navigation }) => {
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[
-                styles.button,
-                pf === "No" && styles.selectedButton,
-              ]}
+              style={[styles.button, pf === "No" && styles.selectedButton]}
               onPress={() => setPf("No")}
             >
               <Text
@@ -615,20 +575,10 @@ const DetailsScreen = ({ navigation }) => {
           )}
         </View>
         <View style={styles.section}>
-          <View style={styles.messageBox}>
-            <Image
-              source={require("../../assets/chowkpe.png")}
-              style={styles.logoImage}
-            />
-            <Text style={styles.sectionText}>ESI</Text>
-            <Text style={styles.dateText}>25 Jan 24</Text>
-          </View>
+          <HeadingBox name="ESI"/>
           <View style={styles.buttonGroup}>
             <TouchableOpacity
-              style={[
-                styles.button,
-                esi === "Yes" && styles.selectedButton,
-              ]}
+              style={[styles.button, esi === "Yes" && styles.selectedButton]}
               onPress={() => setEsi("Yes")}
             >
               <Text
@@ -641,10 +591,7 @@ const DetailsScreen = ({ navigation }) => {
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[
-                styles.button,
-                esi === "No" && styles.selectedButton,
-              ]}
+              style={[styles.button, esi === "No" && styles.selectedButton]}
               onPress={() => setEsi("No")}
             >
               <Text
@@ -669,20 +616,10 @@ const DetailsScreen = ({ navigation }) => {
           )}
         </View>
         <View style={styles.section}>
-          <View style={styles.messageBox}>
-            <Image
-              source={require("../../assets/chowkpe.png")}
-              style={styles.logoImage}
-            />
-            <Text style={styles.sectionText}>Food</Text>
-            <Text style={styles.dateText}>25 Jan 24</Text>
-          </View>
+          <HeadingBox name="Food"/>
           <View style={styles.buttonGroup}>
             <TouchableOpacity
-              style={[
-                styles.button,
-                food === "Yes" && styles.selectedButton,
-              ]}
+              style={[styles.button, food === "Yes" && styles.selectedButton]}
               onPress={() => setFood("Yes")}
             >
               <Text
@@ -695,10 +632,7 @@ const DetailsScreen = ({ navigation }) => {
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[
-                styles.button,
-                food === "No" && styles.selectedButton,
-              ]}
+              style={[styles.button, food === "No" && styles.selectedButton]}
               onPress={() => setFood("No")}
             >
               <Text
@@ -723,14 +657,7 @@ const DetailsScreen = ({ navigation }) => {
           )}
         </View>
         <View style={styles.section}>
-          <View style={styles.messageBox}>
-            <Image
-              source={require("../../assets/chowkpe.png")}
-              style={styles.logoImage}
-            />
-            <Text style={styles.sectionText}>Accomodation</Text>
-            <Text style={styles.dateText}>25 Jan 24</Text>
-          </View>
+          <HeadingBox name="Accomodation"/>
           <View style={styles.buttonGroup}>
             <TouchableOpacity
               style={[
@@ -776,18 +703,16 @@ const DetailsScreen = ({ navigation }) => {
             </View>
           )}
         </View>
-        {/* <View style={styles.section}>
+        <View style={styles.section}>
           <TouchableOpacity
             style={[
               styles.submitButton,
-              isSubmitEnabled() ? styles.submitButtonEnabled : styles.submitButtonDisabled
             ]}
-            disabled={!isSubmitEnabled()}
             onPress={handleSubmit}
           >
             <Text style={styles.submitButtonText}>Submit</Text>
           </TouchableOpacity>
-        </View>     */}
+        </View>
       </ScrollView>
     </View>
   );
@@ -803,7 +728,7 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flexGrow: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   backButton: {
     width: 40,
@@ -935,8 +860,8 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   selectedWorkTypeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginTop: 10,
     alignSelf: "flex-end",
   },
@@ -959,17 +884,17 @@ const styles = StyleSheet.create({
     marginRight: 5,
   },
   requestCallbackBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#007bff',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#007bff",
     padding: 15,
     borderRadius: 10,
     width: "60%",
-    alignSelf: "flex-end"
+    alignSelf: "flex-end",
   },
   phoneButton: {
-    backgroundColor: '#007bff',
+    backgroundColor: "#007bff",
     padding: 5,
     borderRadius: 50,
   },
@@ -979,7 +904,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   input: {
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderWidth: 1,
     borderRadius: 10,
     padding: 10,
@@ -990,7 +915,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 10,
     marginBottom: 10,
-    width: "40%"
+    width: "40%",
   },
   addButtonText: {
     color: "#fff",
@@ -1000,13 +925,14 @@ const styles = StyleSheet.create({
   selectedImage: {
     width: 100,
     height: 100,
-    resizeMode: 'cover',
+    resizeMode: "cover",
   },
   imageTypeContainer: {
     padding: 20,
     borderRadius: 10,
   },
   submitButton: {
+    backgroundColor: "#007bff",
     padding: 15,
     borderRadius: 5,
     alignItems: "center",
@@ -1015,7 +941,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   submitButtonEnabled: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: "#007bff",
   },
   submitButtonDisabled: {
     backgroundColor: "#ccc",
