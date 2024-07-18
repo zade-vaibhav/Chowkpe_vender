@@ -13,12 +13,6 @@ const HrmsScreen = () => (
   </View>
 );
 
-const ProfileScreen = () => (
-  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-    <Text>Profile Screen</Text>
-  </View>
-);
-
 const BottomNavigtor = () => {
   return (
       <Tab.Navigator

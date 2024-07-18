@@ -40,6 +40,7 @@ export default function App() {
         />
          <Stack.Screen name="OtpNew" component={OtpScreen} />
          <Stack.Screen name="BottomNavigator" component={BottomNavigtor} />
+         <Stack.Screen name="Create Task" component={CreateTask} />
          <Stack.Screen name="Worker Profile" component={WorkerProfileScreen} />
          <Stack.Screen name="Select Category" component={CategoryScreen}  />
          <Stack.Screen name="Details Screen" component={DetailsScreen} />

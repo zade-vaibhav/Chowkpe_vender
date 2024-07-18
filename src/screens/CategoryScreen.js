@@ -54,13 +54,13 @@ const CategoryScreen = ({ navigation }) => {
     {
       id: 7,
       image: require("../../assets/images/skill/Group 1.png"),
-      name: "Picker",
+      name: "Unknown",
       checked: false,
     },
     {
       id: 8,
       image: require("../../assets/images/skill/Group.png"),
-      name: "Forklift Operator",
+      name: "Unknown",
       checked: false,
     },
   ]);

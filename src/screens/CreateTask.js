@@ -38,6 +38,10 @@ const CreateTask = ({ navigation }) => {
     },
   ]);
 
+  const handleNewTask = ()=>{
+    navigation.navigate('Select Category')
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.headingContainer}>
@@ -82,7 +86,7 @@ const CreateTask = ({ navigation }) => {
           </View>
         ))}
       </ScrollView>
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity style={styles.button} onPress={handleNewTask}>
         <View style={styles.circleIcon}>
           <Icon name="add" size={20} color="white" />
         </View>

@@ -73,7 +73,7 @@ const DetailsScreen = ({ route, navigation }) => {
     "Within 1 month",
   ];
   const requiredDocuments = ["ID Proof", "Address Proof"];
-  const hireCategories = ["Cleaning", "Shipping"];
+  const hireCategories = ["Cleaner", "Shipping", "Picker", "Forklift Operator", "Sorter", "Assemble Line Worker"];
 
   const toggleDropdown = () => {
     setDropdownVisible(!dropdownVisible);
@@ -838,18 +838,14 @@ const styles = StyleSheet.create({
     height: 19,
     marginBottom: 10,
   },
-  backButtonImage: {
-    marginLeft: -14,
-    width: 84,
-    height: 84,
-  },
   imageContainer: {
     alignItems: "center",
     marginBottom: 20,
   },
   operatorImage: {
-    width: "80%",
-    height: 150,
+    width: "90%",
+    height: 200,
+    resizeMode: "contain"
   },
   header: {
     marginBottom: 20,

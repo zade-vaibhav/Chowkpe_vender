@@ -11,7 +11,7 @@ const TaskListScreen = () => {
     const navigation = useNavigation();
 
     const handleCreateTask = () => {
-        navigation.navigate('Select Category');
+        navigation.navigate('Create Task');
     };
 
     const carouselData = [
