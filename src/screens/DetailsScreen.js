@@ -7,11 +7,12 @@ import {
   ScrollView,
   Image,
   TextInput,
-  Alert
+  Alert,
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import * as ImagePicker from "expo-image-picker";
 import * as DocumentPicker from "expo-document-picker";
+import axios from "axios";
 
 const RequestCallbackBox = () => {
   return (
@@ -39,13 +40,14 @@ const HeadingBox = (props) => {
   );
 };
 
-const DetailsScreen = ({ navigation }) => {
+const DetailsScreen = ({ route, navigation }) => {
+  const { skillName, skillImage } = route.params;
   const [workType, setWorkType] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
   const [location, setLocation] = useState("");
   const [workers, setWorkers] = useState(null);
   const [description, setDescription] = useState("");
-  const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedImages, setSelectedImages] = useState([]);
   const [salary, setSalary] = useState(null);
   const [pf, setPf] = useState(null);
   const [esi, setEsi] = useState(null);
@@ -63,6 +65,7 @@ const DetailsScreen = ({ navigation }) => {
   const [address, setAddress] = useState("");
   const [desc, setDesc] = useState("");
   const [salaryRange, setSalaryRange] = useState("");
+  const [isAdding, setIsAdding] = useState(false);
   const dates = [
     "Immediately",
     "Within 10 Days",
@@ -142,7 +145,7 @@ const DetailsScreen = ({ navigation }) => {
     });
 
     if (!result.canceled) {
-      setSelectedImage(result.assets[0].uri);
+      setSelectedImages((prevImages) => [...prevImages, result.assets[0].uri]);
     }
   };
 
@@ -154,11 +157,12 @@ const DetailsScreen = ({ navigation }) => {
     });
 
     if (!result.canceled) {
-      setSelectedImage(result.assets[0].uri);
+      setSelectedImages((prevImages) => [...prevImages, result.assets[0].uri]);
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     if (!workType) {
       Alert.alert("Please select a work type.");
       return;
@@ -171,10 +175,10 @@ const DetailsScreen = ({ navigation }) => {
       Alert.alert("Please enter a location.");
       return;
     }
-     if (address.trim().length < 10) { 
-    Alert.alert("Please enter a valid location with at least 10 characters.");
-    return;
-  }
+    if (address.trim().length < 10) {
+      Alert.alert("Please enter a valid location with at least 10 characters.");
+      return;
+    }
     if (!workerNumber.trim()) {
       Alert.alert("Please enter a worker Number.");
       return;
@@ -187,11 +191,13 @@ const DetailsScreen = ({ navigation }) => {
       Alert.alert("Please enter work description.");
       return;
     }
-    if (desc.trim().length < 10) { 
-      Alert.alert("Please enter a valid work description with at least 10 characters.");
+    if (desc.trim().length < 10) {
+      Alert.alert(
+        "Please enter a valid work description with at least 10 characters."
+      );
       return;
     }
-    if (!selectedImage) {
+    if (!selectedImages) {
       Alert.alert("Please select an image.");
       return;
     }
@@ -203,14 +209,25 @@ const DetailsScreen = ({ navigation }) => {
       Alert.alert("Please select a hire category.");
       return;
     }
-    if (!salaryRange.trim()) {
-      Alert.alert("Please select salary range.");
-      return;
-    }
-    if (isNaN(salaryRange) || parseInt(salaryRange) < 1000) {
-      Alert.alert("Please enter a valid Salary range  (1000 or greater).");
-      return;
-    }
+    const salaryRangePattern = /^(\d+)(-\d+)?$/;
+  if (!salaryRange.trim()) {
+    Alert.alert("Please select salary range.");
+    return;
+  }
+  const salaryRangeMatch = salaryRange.trim().match(salaryRangePattern);
+  if (!salaryRangeMatch) {
+    Alert.alert("Please enter a valid salary range (e.g., 1000 or 10000-20000).");
+    return;
+  }
+  const [_, minSalary, maxSalary] = salaryRangeMatch;
+  if (parseInt(minSalary) < 1000) {
+    Alert.alert("Minimum salary should be 1000 or greater.");
+    return;
+  }
+  if (maxSalary && parseInt(maxSalary.slice(1)) < 1000) { 
+    Alert.alert("Maximum salary should be 1000 or greater.");
+    return;
+  }
     if (!pf) {
       Alert.alert("Please select PF confimation.");
       return;
@@ -227,29 +244,93 @@ const DetailsScreen = ({ navigation }) => {
       Alert.alert("Please select accomodation confimation.");
       return;
     }
-    console.log("Form submitted");
+
+    setIsAdding(true);
+    const formData = new FormData();
+    formData.append("workType", workType);
+    formData.append("selectedDate", selectedDate);
+    formData.append("address", address);
+    formData.append("workerNumber", workerNumber);
+    formData.append("desc", desc);
+    selectedImages.forEach((imageUri, index) => {
+      formData.append(`image_${index}`, {
+        uri: imageUri,
+        type: "image/jpeg",
+        name: `image_${index}.${imageUri.split(".").pop()}`,
+      });
+    });
+    formData.append("selectedDocuments", selectedDocument);
+    formData.append("selectedCategory", selectedCategory);
+    formData.append("salaryRange", salaryRange);
+    formData.append("pf", pf);
+    formData.append("esi", esi);
+    formData.append("food", food);
+    formData.append("accomodation", accomodation);
+
+    console.log("FormData: ", formData);
+
+    try {
+      const response = await fetch(
+        "https://chowkpe-server.onrender.com/api/v1/admin/tasks/create",
+        {
+          method: "POST",
+          // headers: {
+          //   "Content-Type": "multipart/form-data",
+          // },
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      const data = await response.json();
+      alert("Task created successfully");
+      console.log(data);
+      setWorkType("");
+      setSelectedDate("");
+      setAddress("");
+      setWorkerNumber("");
+      setDesc("");
+      setSelectedImages([]);
+      setSelectedDocument("");
+      setSelectedCategory("");
+      setSalaryRange("");
+      setPf("");
+      setEsi("");
+      setFood("");
+      setAccomodation("")
+    } catch (error) {
+      console.error("Fetch Error:", error);
+    } finally {
+      setIsAdding(false);
+    }
   };
 
   return (
     <View style={styles.container}>
+      <View style={styles.headingContainer}>
       <TouchableOpacity
         style={styles.backButton}
         onPress={() => navigation.goBack()}
       >
         <Icon name="arrow-back" size={24} color="black" />
       </TouchableOpacity>
+      <Text style={styles.heading}>Details</Text>
+      </View>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContainer}
       >
         <View style={styles.imageContainer}>
           <Image
-            source={require("../../assets/Forklifter.png")}
+            source={skillImage}
             style={styles.operatorImage}
           />
         </View>
         <View style={styles.header}>
-          <Text style={styles.headerText}>Forklift Operator</Text>
+          <Text style={styles.headerText}>{skillName}</Text>
           <Text style={styles.center}>Today</Text>
         </View>
         <View style={styles.messageBox}>
@@ -384,7 +465,7 @@ const DetailsScreen = ({ navigation }) => {
               </TouchableOpacity>
               <View style={styles.workTypeTextContainer}>
                 <Text style={styles.selectedWorkTypeText}>
-                  {workerNumber} {workerNumber <= 1 ? "Worker":"Workers"}
+                  {workerNumber} {workerNumber <= 1 ? "Worker" : "Workers"}
                 </Text>
               </View>
             </View>
@@ -426,17 +507,13 @@ const DetailsScreen = ({ navigation }) => {
               <Text style={styles.buttonText}>Open Gallery</Text>
             </TouchableOpacity>
           </View>
-          {selectedImage && (
+          {selectedImages.length > 0 && (
             <View style={styles.selectedWorkTypeContainer}>
-              <TouchableOpacity style={styles.editIconContainer}>
-                <Icon name="pencil" size={16} color="gray" />
-              </TouchableOpacity>
-              <View style={styles.imageTypeContainer}>
-                <Image
-                  source={{ uri: selectedImage }}
-                  style={styles.selectedImage}
-                />
-              </View>
+              {selectedImages.map((uri, index) => (
+                <View key={index} style={styles.imageTypeContainer}>
+                  <Image source={{ uri }} style={styles.selectedImage} />
+                </View>
+              ))}
             </View>
           )}
         </View>
@@ -509,7 +586,7 @@ const DetailsScreen = ({ navigation }) => {
           )}
         </View>
         <View style={styles.section}>
-          <HeadingBox name="Salary Range"/>
+          <HeadingBox name="Salary Range" />
           <TextInput
             style={styles.input}
             value={salary}
@@ -534,7 +611,7 @@ const DetailsScreen = ({ navigation }) => {
           )}
         </View>
         <View style={styles.section}>
-          <HeadingBox name="PF"/>
+          <HeadingBox name="PF" />
           <View style={styles.buttonGroup}>
             <TouchableOpacity
               style={[styles.button, pf === "Yes" && styles.selectedButton]}
@@ -575,7 +652,7 @@ const DetailsScreen = ({ navigation }) => {
           )}
         </View>
         <View style={styles.section}>
-          <HeadingBox name="ESI"/>
+          <HeadingBox name="ESI" />
           <View style={styles.buttonGroup}>
             <TouchableOpacity
               style={[styles.button, esi === "Yes" && styles.selectedButton]}
@@ -616,7 +693,7 @@ const DetailsScreen = ({ navigation }) => {
           )}
         </View>
         <View style={styles.section}>
-          <HeadingBox name="Food"/>
+          <HeadingBox name="Food" />
           <View style={styles.buttonGroup}>
             <TouchableOpacity
               style={[styles.button, food === "Yes" && styles.selectedButton]}
@@ -657,7 +734,7 @@ const DetailsScreen = ({ navigation }) => {
           )}
         </View>
         <View style={styles.section}>
-          <HeadingBox name="Accomodation"/>
+          <HeadingBox name="Accomodation" />
           <View style={styles.buttonGroup}>
             <TouchableOpacity
               style={[
@@ -705,9 +782,7 @@ const DetailsScreen = ({ navigation }) => {
         </View>
         <View style={styles.section}>
           <TouchableOpacity
-            style={[
-              styles.submitButton,
-            ]}
+            style={[styles.submitButton]}
             onPress={handleSubmit}
           >
             <Text style={styles.submitButtonText}>Submit</Text>
@@ -722,9 +797,22 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    paddingTop: 50,
-    paddingHorizontal: 20,
-    marginTop: 30,
+    paddingTop: 20,
+    paddingHorizontal: 15,
+  },
+  headingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 10,
+  },
+  heading: {
+    fontSize: 20,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginVertical: 16,
+    padding: 10,
+    color:"black"
   },
   scrollContainer: {
     flexGrow: 1,

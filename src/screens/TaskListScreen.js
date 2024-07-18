@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, FlatList, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList, Dimensions } from 'react-native';
 import Swiper from 'react-native-swiper';
 import { useNavigation } from '@react-navigation/native';
-import Icon from "react-native-vector-icons/Ionicons";
 import { LinearGradient } from 'expo-linear-gradient';
 
 const { width, height } = Dimensions.get("window");
@@ -12,7 +11,7 @@ const TaskListScreen = () => {
     const navigation = useNavigation();
 
     const handleCreateTask = () => {
-        navigation.navigate('WorkerProfile');
+        navigation.navigate('Select Category');
     };
 
     const carouselData = [
@@ -23,14 +22,13 @@ const TaskListScreen = () => {
     ];
 
     const taskData = [
-        { id: 1, title: 'Forklift Operator', startDate: '24/03/23', endDate: '24/03/23', image: require('./assets/forklit.png') },
-        { id: 2, title: 'Cleaner', startDate: '24/03/23', endDate: '24/03/23', image: require('./assets/cleaner.png') },
+        { id: 1, title: 'Forklift Operator', startDate: '24/03/23', endDate: '24/03/23', image: require('../../assets/Forklifter.png') },
+        { id: 2, title: 'Cleaner', startDate: '24/03/23', endDate: '24/03/23', image: require('../../assets/cleaner.png') },
         { id: 3, title: 'Forklift Operator', startDate: '24/03/23', endDate: '24/03/23', image: 'https://via.placeholder.com/350x150' },
         { id: 4, title: 'Painter', startDate: '24/03/23', endDate: '24/03/23', image: 'https://via.placeholder.com/350x150' },
         { id: 5, title: 'Electrician', startDate: '24/03/23', endDate: '24/03/23', image: 'https://via.placeholder.com/350x150' },
         { id: 6, title: 'Plumber', startDate: '24/03/23', endDate: '24/03/23', image: 'https://via.placeholder.com/350x150' },
     ];
-
 
     const getDaysInMonth = (month, year) => {
         const date = new Date(year, month, 1);
@@ -79,13 +77,13 @@ const TaskListScreen = () => {
     return (
         <View style={styles.container}>
             <View style={styles.header}>
-                <Image source={require('./assets/chowkpe.png')} style={styles.logo} />
+                <Image source={require('../../assets/chowkpe.png')} style={styles.logo} />
                 <View style={styles.headerRight}>
                     <TouchableOpacity onPress={() => { }}>
-                        <Image source={require('./assets/Group298.png')} style={styles.notificationIcon} />
+                        <Image source={require('../../assets/Group298.png')} style={styles.notificationIcon} />
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => { }}>
-                        <Image source={require('./assets/Ellipse.png')} style={styles.profileIcon} />
+                        <Image source={require('../../assets/Ellipse.png')} style={styles.profileIcon} />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -104,26 +102,24 @@ const TaskListScreen = () => {
                     ))}
                 </Swiper>
             </View>
-            <ScrollView contentContainerStyle={styles.content}>
-                <View style={styles.calendarContainer}>
-                    <Text style={styles.dateLabel}>Date</Text>
-                    <FlatList
-                        data={daysInMonth}
-                        renderItem={renderDateItem}
-                        keyExtractor={(item) => item.toString()}
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={styles.dateStyle}
-                    />
-                </View>
+            <View style={styles.calendarContainer}>
+                <Text style={styles.dateLabel}>Date</Text>
                 <FlatList
-                    data={taskData}
-                    renderItem={renderTaskItem}
-                    keyExtractor={item => item.id.toString()}
-                    style={styles.taskList}
-                    contentContainerStyle={styles.scrollContainer}
+                    data={daysInMonth}
+                    renderItem={renderDateItem}
+                    keyExtractor={(item) => item.toString()}
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.dateStyle}
                 />
-            </ScrollView>
+            </View>
+            <FlatList
+                data={taskData}
+                renderItem={renderTaskItem}
+                keyExtractor={item => item.id.toString()}
+                style={styles.taskList}
+                contentContainerStyle={styles.scrollContainer}
+            />
 
             <TouchableOpacity style={styles.fab} onPress={handleCreateTask}>
                 <Text style={styles.fabText}>+</Text>
@@ -145,7 +141,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         borderBottomWidth: 1,
         borderBottomColor: '#eee',
-        marginTop: '6%',
+        marginTop: '7%',
     },
     logo: {
         height: 40,
@@ -164,6 +160,7 @@ const styles = StyleSheet.create({
         width: 35,
         height: 35,
         marginRight: 15,
+        marginTop: '5%',
     },
     carousel: {
         height: '100%',
@@ -183,17 +180,17 @@ const styles = StyleSheet.create({
         borderRadius: 8,
     },
 
-    content: {
-        paddingHorizontal: 16,
-        paddingTop: 10,
-    },
     calendarContainer: {
+        paddingHorizontal: 16,
         marginBottom: 10,
     },
     dateLabel: {
         fontSize: 18,
         fontWeight: 'bold',
+        marginTop: 5,
+        marginLeft: -8,
         marginBottom: 5,
+        paddingHorizontal: 16,
     },
     dateItem: {
         width: 35,
@@ -222,53 +219,58 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         overflow: 'hidden',
         elevation: 3,
-        marginVertical: 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 2,
+        marginBottom: 15,
     },
     cardGradient: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: 15,
-        paddingVertical: 10,
+        padding: 15,
     },
     cardLeft: {
         flex: 1,
     },
     cardTitle: {
-        fontSize: 16,
+        fontSize: 18,
         fontWeight: 'bold',
-        color: '#333',
+        marginBottom: 5,
     },
     cardDate: {
         fontSize: 14,
         color: '#555',
-        marginTop: 5,
     },
     cardRight: {
-        flex: 1,
-        alignItems: 'flex-end',
+        width: 100,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     cardImage: {
-        width: 80,
+        width: '100%',
         height: 80,
         resizeMode: 'cover',
         borderRadius: 8,
     },
+    scrollContainer: {
+        paddingHorizontal: 16,
+        paddingBottom: 100, // adjust as needed
+    },
     fab: {
         position: 'absolute',
+        width: 60,
+        height: 60,
+        backgroundColor: '#3B82F6',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 30,
         bottom: 20,
         right: 20,
-        backgroundColor: '#3B82F6',
-        width: 50,
-        height: 50,
-        borderRadius: 25,
-        justifyContent: 'center',
-        alignItems: 'center',
         elevation: 5,
     },
     fabText: {
+        fontSize: 36,
         color: 'white',
-        fontSize: 24,
     },
 });
 

@@ -74,18 +74,20 @@ const CategoryScreen = ({ navigation }) => {
 
   const handleCheckBoxClick = (id) => {
     const updatedSkills = skills.map((skill) =>
-      skill.id === id ? { ...skill, checked: !skill.checked } : skill
+      skill.id === id ? { ...skill, checked: !skill.checked } : { ...skill, checked: false }
     );
     setSkills(updatedSkills);
   };
 
-//   const handleContinuePress = () => {
-//     if (!isContinueDisabled) {
-//       navigation.navigate("CreatProileScreen", { skills, referralId });
-//     }
-//   };
-  // console.log(skills);
-
+  const handleContinuePress = () => {
+    if (!isContinueDisabled) {
+      const selectedSkill = skills.find((skill) => skill.checked);
+      navigation.navigate("Details Screen", {
+        skillName: selectedSkill.name,
+        skillImage: selectedSkill.image,
+      });
+    }
+  };
 
 
   return (
@@ -128,6 +130,7 @@ const CategoryScreen = ({ navigation }) => {
         </View>
       </ScrollView>
       <TouchableOpacity
+        onPress={handleContinuePress}
         style={[styles.button, isContinueDisabled && styles.disabledButton]}
         disabled={isContinueDisabled}
       >

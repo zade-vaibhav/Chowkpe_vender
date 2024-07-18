@@ -9,42 +9,42 @@ import CategoryScreen from "./src/screens/CategoryScreen";
 import CreateTask from "./src/screens/CreateTask";
 import BottomNavigtor from "./src/navigation/BottomNavigator";
 import DetailsScreen from "./src/screens/DetailsScreen";
+import WorkerProfileScreen from "./src/screens/WorkerProfileScreen";
 
 const Stack = createStackNavigator();
 
 export default function App() {
   return (
-    // <NavigationContainer>
-    //   <StatusBar
-    //     barStyle="light-content"
-    //     backgroundColor="#021F93"
-    //     translucent={true}
-    //   />
-    //   <Stack.Navigator
-    //     screenOptions={{
-    //       headerShown: false,
-    //       ...TransitionPresets.SlideFromRightIOS,
-    //     }}
-    //   >
-    //     <Stack.Screen name="Onbord" component={SplashScreen} options={{ headerShown: false, ...TransitionPresets.DefaultTransition }} />
-    //     <Stack.Screen
-    //       name="Welcome"
-    //       component={Welcome}
-    //       options={{ ...TransitionPresets.DefaultTransition }}
-    //     />
-    //     <Stack.Screen
-    //       name="Login"
-    //       component={LoginScreen}
-    //       options={{ ...TransitionPresets.DefaultTransition }}
-    //     />
-    //      <Stack.Screen name="OtpNew" component={OtpScreen} />
-    //      <Stack.Screen name="BottomNavigator" component={BottomNavigtor} />
-    //      <Stack.Screen name="Select Category" component={CategoryScreen}  />
-    //   </Stack.Navigator>
-    // </NavigationContainer>
-    // <CreateTask />
-    // <BottomNavigtor />
-    <DetailsScreen />
+    <NavigationContainer>
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor="#021F93"
+        translucent={true}
+      />
+      <Stack.Navigator
+        screenOptions={{
+          headerShown: false,
+          ...TransitionPresets.SlideFromRightIOS,
+        }}
+      >
+        <Stack.Screen name="Onbord" component={SplashScreen} options={{ headerShown: false, ...TransitionPresets.DefaultTransition }} />
+        <Stack.Screen
+          name="Welcome"
+          component={Welcome}
+          options={{ ...TransitionPresets.DefaultTransition }}
+        />
+        <Stack.Screen
+          name="Login"
+          component={LoginScreen}
+          options={{ ...TransitionPresets.DefaultTransition }}
+        />
+         <Stack.Screen name="OtpNew" component={OtpScreen} />
+         <Stack.Screen name="BottomNavigator" component={BottomNavigtor} />
+         <Stack.Screen name="Worker Profile" component={WorkerProfileScreen} />
+         <Stack.Screen name="Select Category" component={CategoryScreen}  />
+         <Stack.Screen name="Details Screen" component={DetailsScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
 
