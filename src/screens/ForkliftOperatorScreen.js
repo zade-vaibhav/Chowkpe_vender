@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Image } from 'react-native';
 
-const ForkliftOperatorScreen = () => {
-    const [workType, setWorkType] = useState('Full Time');
+const ForkliftOperatorScreen = ({ route, navigation }) => {
+    const { skillName, skillImage } = route.params;
+    const [workType, setWorkType] = useState('');
     const [selectedDate, setSelectedDate] = useState(null);
     const dates = ['Immediately', 'After 15 days', 'After 1 month'];
+    const [submitButtonActive, setSubmitButtonActive] = useState(false);
 
     const [dropdownVisible, setDropdownVisible] = useState(false);
     const [selectedItem, setSelectedItem] = useState('Select Starting Date');
@@ -19,16 +21,25 @@ const ForkliftOperatorScreen = () => {
         setDropdownVisible(false);
     };
 
+    useEffect(() => {
+        // Enable submit button if both workType and selectedDate are selected
+        if (workType !== '' && selectedDate !== null) {
+            setSubmitButtonActive(true);
+        } else {
+            setSubmitButtonActive(false);
+        }
+    }, [workType, selectedDate]);
+
     return (
         <View style={styles.container}>
-            <TouchableOpacity style={styles.backButton}>
+            <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
                 <Image source={require('./assets/vector.png')} style={styles.backButtonImage} />
             </TouchableOpacity>
             <View style={styles.imageContainer}>
-                <Image source={require('./assets/forklift.png')} style={styles.operatorImage} />
+                <Image source={skillImage} style={styles.operatorImage} />
             </View>
             <View style={styles.header}>
-                <Text style={styles.headerText}>Forklift Operator</Text>
+                <Text style={styles.headerText}>{skillName}</Text>
                 <Text style={styles.center}>Today</Text>
             </View>
             <View style={styles.messageBox}>
@@ -77,6 +88,12 @@ const ForkliftOperatorScreen = () => {
                     )}
                 </View>
             </ScrollView>
+            <TouchableOpacity
+                style={[styles.submitButton, !submitButtonActive && styles.disabledButton]}
+                disabled={!submitButtonActive}
+            >
+                <Text style={[styles.submitButtonText, !submitButtonActive && styles.disabledButtonText]}>Submit</Text>
+            </TouchableOpacity>
         </View>
     );
 };
@@ -91,7 +108,7 @@ const styles = StyleSheet.create({
     backButton: {
         position: 'absolute',
         top: 20,
-        left: 20,
+        left: 5,
         zIndex: 10,
     },
     logoImage: {
@@ -202,6 +219,24 @@ const styles = StyleSheet.create({
     },
     selectedDropdownItemText: {
         color: '#fff',
+    },
+    submitButton: {
+        backgroundColor: '#007bff',
+        paddingVertical: 15,
+        borderRadius: 10,
+        alignItems: 'center',
+        marginTop: 20,
+    },
+    submitButtonText: {
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 18,
+    },
+    disabledButton: {
+        backgroundColor: '#ccc',
+    },
+    disabledButtonText: {
+        color: '#007bff',
     },
 });
 

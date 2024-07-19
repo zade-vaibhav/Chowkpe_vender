@@ -1,24 +1,31 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, ScrollView, TouchableOpacity, Alert, KeyboardAvoidingView, Dimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { Picker } from '@react-native-picker/picker';
 
 const CompanyDetailsScreen = () => {
     const [phoneNumber, setPhoneNumber] = useState('');
     const [email, setEmail] = useState('');
     const [alternativePhoneNumber, setAlternativePhoneNumber] = useState('');
     const [alternativeEmail, setAlternativeEmail] = useState('');
+    const [pan, setPan] = useState('');
+    const [businessType, setBusinessType] = useState('');
     const navigation = useNavigation();
-
-    // gst/pan no. , company address
 
     const validatePhoneNumber = (number) => {
         const phoneRegex = /^[0-9]{10}$/;
         return phoneRegex.test(number);
     };
-
+    const validatePan = (pan) => {
+        const panRegex = /^[A-Za-z]{5}[0-9]{4}[A-Za-z]$/;
+        return panRegex.test(pan);
+    };
     const validateEmail = (email) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailRegex.test(email);
+    };
+    const handlePanChange = (text) => {
+        setPan(text.toLowerCase());
     };
 
     const handleContinue = () => {
@@ -26,11 +33,15 @@ const CompanyDetailsScreen = () => {
             Alert.alert('Invalid Phone Number', 'Please enter a valid 10-digit phone number.');
             return;
         }
+        if (!validatePan(pan)) {
+            Alert.alert('Invalid Pan Number', 'Please enter a valid pan number.');
+            return;
+        }
         if (!validateEmail(email)) {
             Alert.alert('Invalid Email Address', 'Please enter a valid email address.');
             return;
         }
-        // Additional validation can be added here if needed
+
 
         Alert.alert('Success', 'Form submitted successfully!');
         navigation.navigate('TaskList');
@@ -46,10 +57,16 @@ const CompanyDetailsScreen = () => {
                     <View style={styles.form}>
                         <View style={styles.inputGroup}>
                             <Text style={styles.label}>Business Type</Text>
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Select business type"
-                            />
+                            <Picker
+                                selectedValue={businessType}
+                                onValueChange={(itemValue) => setBusinessType(itemValue)}
+                                style={styles.picker}
+                            >
+                                <Picker.Item label="Select business type" value="" />
+                                <Picker.Item label="Cleaning" value="cleaning" />
+                                <Picker.Item label="Forkliftoperator" value="forkliftoperator" />
+
+                            </Picker>
                         </View>
                         <View style={styles.inputGroup}>
                             <Text style={styles.label}>Business Name</Text>
@@ -106,12 +123,25 @@ const CompanyDetailsScreen = () => {
                             />
                         </View>
                         <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Pan Number</Text>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Enter your pan number"
+                                value={pan}
+                                onChangeText={handlePanChange} />
+                        </View>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>GST Number</Text>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Enter your GST number"
+                            />
+                        </View>
+                        <View style={styles.inputGroup}>
                             <Text style={styles.label}>Company Address</Text>
                             <TextInput
                                 style={styles.input}
                                 placeholder="Enter company address"
-
-
                             />
                         </View>
                     </View>
@@ -120,7 +150,7 @@ const CompanyDetailsScreen = () => {
                     <TouchableOpacity style={styles.buttonContainer} onPress={handleContinue}>
                         <Text style={styles.buttonText}>Continue</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => { }}>
+                    <TouchableOpacity onPress={() => navigation.navigate('TaskList')}>
                         <Text style={styles.skipText}>Skip for now</Text>
                     </TouchableOpacity>
                 </View>
@@ -164,6 +194,20 @@ const styles = StyleSheet.create({
         color: '#333',
     },
     input: {
+        height: 50,
+        borderColor: '#ccc',
+        borderWidth: 1,
+        borderRadius: 5,
+        paddingHorizontal: 10,
+        backgroundColor: '#f9f9f9',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 2,
+        elevation: 2,
+        fontSize: Dimensions.get('window').width * 0.04,
+    },
+    picker: {
         height: 50,
         borderColor: '#ccc',
         borderWidth: 1,

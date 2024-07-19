@@ -3,48 +3,68 @@ import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
-
-const WorkerProfileScreen = () => {
+const WorkerProfileScreen = ({ route }) => {
     const navigation = useNavigation();
+    const { name, skills, rating, experience, image } = route.params;
 
     const handlePayment = () => {
-        // Navigate to WorkerProfileScreen when "Create Task" is pressed
         navigation.navigate('ForkliftOperator');
+    };
+
+    const renderStars = (rating) => {
+        const maxStars = 5; // Total number of stars
+        let stars = [];
+
+        for (let i = 0; i < maxStars; i++) {
+            stars.push(
+                <FontAwesome
+                    key={i}
+                    name="star"
+                    size={24}
+                    color={i < rating ? '#FFD700' : '#ccc'} // Gold for filled stars, light gray for empty
+                />
+            );
+        }
+
+        return stars;
     };
 
     return (
         <View style={styles.container}>
-            {/* Header */}
+
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>Worker Profile</Text>
             </View>
 
-            {/* Profile Section */}
+
             <View style={styles.profileContainer}>
                 <Image
-                    source={{ uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT3flIHsvZtK3eU7tEnp-LSEjNznTZCn0dkcA&s' }}
+                    source={image || { uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT3flIHsvZtK3eU7tEnp-LSEjNznTZCn0dkcA&s' }}
                     style={styles.profileImage}
                 />
                 <View style={styles.profileDetails}>
-                    <Text style={styles.profileName}>Ashutosh Pandey</Text>
+                    <Text style={styles.profileName}>{name}</Text>
                     <Text style={styles.profileTitle}>Cleaning Expert</Text>
                     <View style={styles.ratingContainer}>
-                        <Text style={styles.ratingText}>4.5</Text>
-                        <Text style={styles.ratingStars}>★★★★★</Text>
+                        <Text style={styles.ratingText}>{rating}</Text>
+                        <View style={styles.ratingStars}>
+                            {renderStars(Math.floor(rating))}
+                        </View>
                         <FontAwesome name="whatsapp" size={24} color="#25D366" style={styles.icon} />
                         <FontAwesome name="phone" size={24} color="#3B82F6" style={styles.icon} />
                     </View>
                 </View>
             </View>
 
-            {/* Info Section */}
+
             <View style={styles.infoContainer}>
                 <View style={styles.infoBox}>
                     <Text style={styles.infoText}>259+</Text>
                     <Text style={styles.infoLabel}>Service Delivered</Text>
                 </View>
+                <View style={styles.line} />
                 <View style={styles.infoBox}>
-                    <Text style={styles.infoText}>05+</Text>
+                    <Text style={styles.infoText}>{experience}+</Text>
                     <Text style={styles.infoLabel}>Years of Experience</Text>
                 </View>
             </View>
@@ -53,22 +73,16 @@ const WorkerProfileScreen = () => {
             <View style={styles.skillsContainer}>
                 <Text style={styles.skillsTitle}>Skill Experience</Text>
                 <View style={styles.skillsBox}>
-                    <View style={styles.skillItem}>
-                        <Image source={require('./assets/cleaner.png')}
-                            style={styles.skillImage}
-                        />
-                        <Text style={styles.skillText}>Cleaner</Text>
-                    </View>
-                    <View style={styles.skillItem}>
-                        <Image source={require('./assets/forklit.png')}
-                            style={styles.skillImage}
-                        />
-                        <Text style={styles.skillText}>Forklift Operator</Text>
-                    </View>
+                    {skills.split(', ').map((skill, index) => (
+                        <View key={index} style={styles.skillItem}>
+                            <Image source={require('../../assets/cleaner.png')} style={styles.skillImage} />
+                            <Text style={styles.skillText}>{skill}</Text>
+                        </View>
+                    ))}
                 </View>
             </View>
 
-            {/* Payment Section (Footer) */}
+
             <View style={styles.footer}>
                 <TouchableOpacity
                     style={styles.paymentContainer}
@@ -129,8 +143,8 @@ const styles = StyleSheet.create({
         marginRight: 5,
     },
     ratingStars: {
-        fontSize: 18,
-        color: '#FFD700',
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     icon: {
         marginLeft: 10,
@@ -140,10 +154,20 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         marginBottom: 20,
         marginTop: '8%',
+        borderWidth: 0.3,
+        borderColor: '#ccc',
+        borderRadius: 10,
+        padding: 20,
+        backgroundColor: '#f9f9f9',
     },
     infoBox: {
         alignItems: 'center',
         flex: 1,
+    },
+    line: {
+        width: 1,
+        backgroundColor: '#ccc',
+        marginHorizontal: 10,
     },
     infoText: {
         fontSize: 24,
@@ -170,6 +194,17 @@ const styles = StyleSheet.create({
     },
     skillItem: {
         alignItems: 'center',
+        width: '45%',
+        borderWidth: 1,
+        borderColor: '#ccc',
+        padding: 10,
+        backgroundColor: '#fff',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.6,
+        shadowRadius: 6,
+        elevation: 2,
+        borderRadius: 20,
     },
     skillImage: {
         width: 100,
