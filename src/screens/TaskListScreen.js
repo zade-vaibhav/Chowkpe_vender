@@ -1,59 +1,78 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList, Dimensions } from 'react-native';
 import Swiper from 'react-native-swiper';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { format, addDays, isSameDay } from 'date-fns';
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 const { width, height } = Dimensions.get("window");
 
-const TaskListScreen = () => {
+const TaskListScreen = ({ carouselData = [], taskData = [] }) => {
     const [selectedDate, setSelectedDate] = useState(new Date());
+    const [selectedDateStr, setSelectedDateStr] = useState(format(new Date(), 'dd/MM/yy'));
+    const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const navigation = useNavigation();
 
     const handleCreateTask = () => {
         navigation.navigate('Create Task');
     };
 
-    const carouselData = [
+    const showDatePicker = () => {
+        setDatePickerVisibility(true);
+    };
+
+    const hideDatePicker = () => {
+        setDatePickerVisibility(false);
+    };
+
+    const handleConfirm = (date) => {
+        setSelectedDate(date);
+        setSelectedDateStr(format(date, 'dd/MM/yy'));
+        hideDatePicker();
+    };
+
+    const defaultCarouselData = [
         { image: 'https://images.pexels.com/photos/439416/pexels-photo-439416.jpeg?cs=srgb&dl=pexels-sevenstormphotography-439416.jpg&fm=jpg', id: 1 },
         { image: 'https://www.jkcement.com/wp-content/uploads/2023/09/plasterer-hand-rubber-glove-using-wooden-trowel-plastering-cement-brick-wall-background-1-scaled.jpg', id: 2 },
         { image: 'https://images.unsplash.com/photo-1591955506264-3f5a6834570a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fGNvbnN0cnVjdGlvbnxlbnwwfHwwfHx8MA%3D%3D&w=1000&q=80', id: 3 },
         { image: 'https://images.unsplash.com/photo-1591955506264-3f5a6834570a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fGNvbnN0cnVjdGlvbnxlbnwwfHwwfHx8MA%3D%3D&w=1000&q=80', id: 4 },
     ];
 
-    const taskData = [
+    const defaultTaskData = [
         { id: 1, title: 'Forklift Operator', startDate: '24/03/23', endDate: '24/03/23', image: require('../../assets/Forklifter.png') },
         { id: 2, title: 'Cleaner', startDate: '24/03/23', endDate: '24/03/23', image: require('../../assets/cleaner.png') },
         { id: 3, title: 'Forklift Operator', startDate: '24/03/23', endDate: '24/03/23', image: 'https://via.placeholder.com/350x150' },
-        { id: 4, title: 'Painter', startDate: '24/03/23', endDate: '24/03/23', image: 'https://via.placeholder.com/350x150' },
-        { id: 5, title: 'Electrician', startDate: '24/03/23', endDate: '24/03/23', image: 'https://via.placeholder.com/350x150' },
+        { id: 4, title: 'Painter', startDate: '19/07/24', endDate: '24/07/24', image: 'https://via.placeholder.com/350x150' },
+        { id: 5, title: 'Electrician', startDate: '19/07/24', endDate: '30/07/24', image: 'https://via.placeholder.com/350x150' },
         { id: 6, title: 'Plumber', startDate: '24/03/23', endDate: '24/03/23', image: 'https://via.placeholder.com/350x150' },
     ];
 
-    const getDaysInMonth = (month, year) => {
-        const date = new Date(year, month, 1);
-        const days = [];
-        while (date.getMonth() === month) {
-            days.push(new Date(date));
-            date.setDate(date.getDate() + 1);
-        }
-        return days;
+    const dates = Array.from({ length: 30 }, (_, i) => addDays(new Date(), i));
+
+    const filterTasksByDate = (tasks, dateStr) => {
+        return tasks.filter(task => task.startDate === dateStr);
     };
 
+    const filteredTasks = useMemo(() => filterTasksByDate(taskData.length ? taskData : defaultTaskData, selectedDateStr), [selectedDateStr, taskData]);
+
     const renderDateItem = ({ item }) => {
-        const isSelected = item.toDateString() === selectedDate.toDateString();
+        const dayOfWeek = format(item, "EEE");
+        const dayOfMonth = format(item, "dd");
+        const isSelected = isSameDay(item, selectedDate);
         return (
             <TouchableOpacity
                 style={[styles.dateItem, isSelected && styles.selectedDateItem]}
-                onPress={() => setSelectedDate(item)}
+                onPress={() => {
+                    setSelectedDate(item);
+                    setSelectedDateStr(format(item, 'dd/MM/yy'));
+                }}
             >
-                <Text style={[styles.dateText, isSelected && styles.selectedDateText]}>{item.getDate()}</Text>
+                <Text style={[styles.dateText, isSelected && styles.selectedDateText]}>{dayOfWeek}</Text>
+                <Text style={[styles.dateText, isSelected && styles.selectedDateText]}>{dayOfMonth}</Text>
             </TouchableOpacity>
         );
     };
-
-    const daysInMonth = getDaysInMonth(selectedDate.getMonth(), selectedDate.getFullYear());
-
     const renderTaskItem = ({ item }) => (
         <View style={styles.card}>
             <LinearGradient
@@ -94,36 +113,54 @@ const TaskListScreen = () => {
                     dotStyle={styles.dotStyle}
                     activeDotStyle={styles.activeDotStyle}
                 >
-                    {carouselData.map((item) => (
+                    {(carouselData.length ? carouselData : defaultCarouselData).map((item) => (
                         <View style={styles.slide} key={item.id}>
                             <Image source={{ uri: item.image }} style={styles.carouselImage} />
-
                         </View>
                     ))}
                 </Swiper>
             </View>
             <View style={styles.calendarContainer}>
-                <Text style={styles.dateLabel}>Date</Text>
+            <View style={styles.dateHeader}>
+                    <Text style={styles.dateLabel}>Date</Text>
+                    <View style={styles.dateSelector}>
+                        <TouchableOpacity onPress={showDatePicker}>
+                            <Image source={require('../../assets/calendar_icon.png')} style={styles.calendarIcon} />
+                        </TouchableOpacity>
+                        <Text style={styles.currentMonthYear}>{format(selectedDate, 'MMMM yyyy')}</Text>
+                    </View>
+                </View>
                 <FlatList
-                    data={daysInMonth}
+                    data={dates}
                     renderItem={renderDateItem}
                     keyExtractor={(item) => item.toString()}
                     horizontal
                     showsHorizontalScrollIndicator={false}
+                    initialNumToRender={5}
+                    maxToRenderPerBatch={5}
+                    windowSize={10}
                     contentContainerStyle={styles.dateStyle}
                 />
+
             </View>
             <FlatList
-                data={taskData}
+                data={filteredTasks}
                 renderItem={renderTaskItem}
                 keyExtractor={item => item.id.toString()}
                 style={styles.taskList}
                 contentContainerStyle={styles.scrollContainer}
+                ListEmptyComponent={<Text style={styles.noTaskText}>No tasks available</Text>}
             />
 
             <TouchableOpacity style={styles.fab} onPress={handleCreateTask}>
                 <Text style={styles.fabText}>+</Text>
             </TouchableOpacity>
+            <DateTimePickerModal
+                isVisible={isDatePickerVisible}
+                mode="date"
+                onConfirm={handleConfirm}
+                onCancel={hideDatePicker}
+            />
         </View>
     );
 };
@@ -184,6 +221,21 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         marginBottom: 10,
     },
+    dateHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 5,
+    },
+    dateSelector: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    calendarIcon: {
+        width: 30,
+        height: 30,
+        marginRight: 5,
+    },
     dateLabel: {
         fontSize: 18,
         fontWeight: 'bold',
@@ -193,14 +245,25 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
     },
     dateItem: {
-        width: 35,
-        height: 35,
+        width: 60,
+        height: 55,
         justifyContent: 'center',
         alignItems: 'center',
         borderRadius: 11,
         borderWidth: 1,
         borderColor: '#ddd',
         marginHorizontal: 5,
+    },
+    currentMonthYear: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#333',
+    },
+    noTaskText: {
+        textAlign: 'center',
+        marginVertical: 20,
+        fontSize: 16,
+        color: '#999',
     },
     selectedDateItem: {
         backgroundColor: '#3B82F6',
@@ -213,6 +276,9 @@ const styles = StyleSheet.create({
     },
     taskList: {
         flex: 1,
+    },
+    dateStyle:{
+        paddingHorizontal: 10,
     },
     card: {
         backgroundColor: 'white',
