@@ -18,49 +18,49 @@ const CategoryScreen = ({ navigation }) => {
     {
       id: 1,
       image: require("../../assets/images/skill/EstatesCard.png"),
-      name: "Shipping",
+      title: "Shipping",
       checked: false,
     },
     {
       id: 2,
       image: require("../../assets/images/skill/Vertical-Full.png"),
-      name: "Cleaner",
+      title: "Cleaner",
       checked: false,
     },
     {
       id: 3,
       image: require("../../assets/images/skill/Vertical-Full1.png"),
-      name: "Picker",
+      title: "Picker",
       checked: false,
     },
     {
       id: 4,
       image: require("../../assets/images/skill/Vertical-Full3.png"),
-      name: "Forklift Operator",
+      title: "Forklift Operator",
       checked: false,
     },
     {
       id: 5,
       image: require("../../assets/images/skill/Sorter.png"),
-      name: "Sorter",
+      title: "Sorter",
       checked: false,
     },
     {
       id: 6,
       image: require("../../assets/images/skill/AssembleWorkerLine.png"),
-      name: "Assemble Line Worker",
+      title: "Assemble Line Worker",
       checked: false,
     },
     {
       id: 7,
       image: require("../../assets/images/skill/Group 1.png"),
-      name: "Unknown",
+      title: "Unknown",
       checked: false,
     },
     {
       id: 8,
       image: require("../../assets/images/skill/Group.png"),
-      name: "Unknown",
+      title: "Unknown",
       checked: false,
     },
   ]);
@@ -83,8 +83,7 @@ const CategoryScreen = ({ navigation }) => {
     if (!isContinueDisabled) {
       const selectedSkill = skills.find((skill) => skill.checked);
       navigation.navigate("Details Screen", {
-        skillName: selectedSkill.name,
-        skillImage: selectedSkill.image,
+        skill: selectedSkill
       });
     }
   };
@@ -124,7 +123,7 @@ const CategoryScreen = ({ navigation }) => {
                   }}
                 />
               </View>
-              <Text style={styles.gridText}>{skill.name}</Text>
+              <Text style={styles.gridText}>{skill.title}</Text>
             </TouchableOpacity>
           ))}
         </View>

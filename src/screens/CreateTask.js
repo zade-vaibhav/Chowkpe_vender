@@ -18,9 +18,24 @@ const CreateTask = ({ navigation }) => {
     {
       id: 1,
       title: "Deep Cleaning",
-      date: "2024-07-12",
+      date: "2023-07-12",
       image: require("../../assets/images/task/Task 1.png"),
       isVideo: false,
+      workType: "Full Time",
+      startingDate: "Immediately",
+      Address: "Yamunagar Haryana",
+      workerNumber: "10",
+      desc: "Not Applicable",
+      jobPhotos: [
+        require("../../assets/images/task/Task 1.png")
+      ],
+      requiredDocuments: "Address Proof",
+      hireCategory: "Forklift Operator",
+      salaryRange: "12000-17000",
+      PF: "No",
+      ESI: "No",
+      Food: "Yes",
+      Accomodation: "Yes"    
     },
     {
       id: 2,
@@ -28,6 +43,21 @@ const CreateTask = ({ navigation }) => {
       date: "2024-07-13",
       image: require("../../assets/images/task/Frame.png"),
       isVideo: true,
+      workType: "Part Time",
+      startingDate: "Within 10 Days",
+      Address: "Sasrsawa Saharanpur",
+      workerNumber: "4",
+      desc: "Nothing Much",
+      jobPhotos: [
+        require("../../assets/images/task/Frame.png")
+      ],
+      requiredDocuments: "ID Proof",
+      hireCategory: "Cleaner",
+      salaryRange: "10000-20000",
+      PF: "Yes",
+      ESI: "No",
+      Food: "Yes",
+      Accomodation: "Yes"    
     },
     {
       id: 3,
@@ -35,12 +65,32 @@ const CreateTask = ({ navigation }) => {
       date: "2024-07-14",
       image: require("../../assets/images/task/Task 3.png"),
       isVideo: false,
+      workType: "Full Time",
+      startingDate: "Within 15 Days",
+      Address: "Gurgaon Haryana",
+      workerNumber: "6",
+      desc: "Can be describe later",
+      jobPhotos: [
+        require("../../assets/images/task/Frame.png"),
+        require("../../assets/images/task/Task 3.png")
+      ],
+      requiredDocuments: "ID Proof",
+      hireCategory: "Shipping",
+      salaryRange: "15000-22000",
+      PF: "Yes",
+      ESI: "Yes",
+      Food: "No",
+      Accomodation: "No"
     },
   ]);
 
-  const handleNewTask = ()=>{
-    navigation.navigate('Select Category')
-  }
+  const handleNewTask = () => {
+    navigation.navigate('Select Category');
+  };
+
+  const handleRebook = (skill) => {
+    navigation.navigate('Details Screen', { skill });
+  };
 
   return (
     <View style={styles.container}>
@@ -65,15 +115,16 @@ const CreateTask = ({ navigation }) => {
               <View style={styles.cardLeft}>
                 <Text style={styles.cardTitle}>{skill.title}</Text>
                 <Text style={styles.cardDate}>{skill.date}</Text>
-                <TouchableOpacity style={styles.rebookButton}>
+                <TouchableOpacity
+                  style={styles.rebookButton}
+                  onPress={() => handleRebook(skill)}
+                >
                   <Text style={styles.rebookButtonText}>Rebook</Text>
                 </TouchableOpacity>
               </View>
               <TouchableOpacity
                 style={styles.cardRight}
-                onPress={() => {
-                  
-                }}
+                onPress={() => {}}
               >
                 <Image source={skill.image} style={styles.cardImage} />
                 {skill.isVideo && (

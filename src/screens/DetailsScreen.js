@@ -14,6 +14,11 @@ import * as ImagePicker from "expo-image-picker";
 import * as DocumentPicker from "expo-document-picker";
 import axios from "axios";
 
+const formatDate = (date) => {
+  const options = { day: '2-digit', month: 'short', year: '2-digit' };
+  return date.toLocaleDateString('en-GB', options);
+};
+
 const RequestCallbackBox = () => {
   return (
     <View style={styles.section}>
@@ -28,6 +33,7 @@ const RequestCallbackBox = () => {
 };
 
 const HeadingBox = (props) => {
+  const today = new Date();
   return (
     <View style={styles.messageBox}>
       <Image
@@ -35,36 +41,37 @@ const HeadingBox = (props) => {
         style={styles.logoImage}
       />
       <Text style={styles.sectionText}>{props.name}</Text>
-      <Text style={styles.dateText}>25 Jan 24</Text>
+      <Text style={styles.dateText}>{formatDate(today)}</Text>
     </View>
   );
 };
 
 const DetailsScreen = ({ route, navigation }) => {
-  const { skillName, skillImage } = route.params;
-  const [workType, setWorkType] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [location, setLocation] = useState("");
-  const [workers, setWorkers] = useState(null);
-  const [description, setDescription] = useState("");
-  const [selectedImages, setSelectedImages] = useState([]);
-  const [salary, setSalary] = useState(null);
-  const [pf, setPf] = useState(null);
-  const [esi, setEsi] = useState(null);
-  const [food, setFood] = useState(null);
-  const [accomodation, setAccomodation] = useState(null);
+  const today = new Date();
+  const { skill } = route.params;
+  const [workType, setWorkType] = useState(skill?.workType || "");
+  const [selectedDate, setSelectedDate] = useState(skill?.startingDate || "");
+  const [location, setLocation] = useState(skill?.Address || "");
+  const [workers, setWorkers] = useState(skill?.workerNumber || "");
+  const [description, setDescription] = useState(skill?.desc || "");
+  const [selectedImages, setSelectedImages] = useState(Array.isArray(skill?.jobPhotos) ? skill.jobPhotos.map(photo => (typeof photo === "number" ? Image.resolveAssetSource(photo).uri : photo)) : []);
+  const [salary, setSalary] = useState(skill?.salaryRange || "");
+  const [pf, setPf] = useState(skill?.PF || "");
+  const [esi, setEsi] = useState(skill?.ESI || "");
+  const [food, setFood] = useState(skill?.Food || "");
+  const [accomodation, setAccomodation] = useState(skill.Accomodation || "");
 
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const [dropdownVisibleDocument, setDropdownVisibleDocument] = useState(false);
   const [dropdownVisibleCategory, setDropdownVisibleCategory] = useState(false);
-  const [selectedItem, setSelectedItem] = useState("Select Starting Date");
-  const [selectedDocument, setSelectedDocument] = useState("Select Document");
-  const [selectedCategory, setSelectedCategory] = useState("Select Category");
+  const [selectedItem, setSelectedItem] = useState(skill?.startingDate || "Select Starting Date");
+  const [selectedDocument, setSelectedDocument] = useState(skill?.requiredDocuments || "Select Document");
+  const [selectedCategory, setSelectedCategory] = useState(skill?.hireCategory || "Select Category");
 
-  const [workerNumber, setWorkerNumber] = useState("");
-  const [address, setAddress] = useState("");
-  const [desc, setDesc] = useState("");
-  const [salaryRange, setSalaryRange] = useState("");
+  const [workerNumber, setWorkerNumber] = useState(skill?.workerNumber || "");
+  const [address, setAddress] = useState(skill?.Address || "");
+  const [desc, setDesc] = useState(skill?.desc || "");
+  const [salaryRange, setSalaryRange] = useState(skill?.salaryRange || "");
   const [isAdding, setIsAdding] = useState(false);
   const dates = [
     "Immediately",
@@ -325,12 +332,12 @@ const DetailsScreen = ({ route, navigation }) => {
       >
         <View style={styles.imageContainer}>
           <Image
-            source={skillImage}
+            source={skill.image}
             style={styles.operatorImage}
           />
         </View>
         <View style={styles.header}>
-          <Text style={styles.headerText}>{skillName}</Text>
+          <Text style={styles.headerText}>{skill.title}</Text>
           <Text style={styles.center}>Today</Text>
         </View>
         <View style={styles.messageBox}>
@@ -339,7 +346,7 @@ const DetailsScreen = ({ route, navigation }) => {
             style={styles.logoImage}
           />
           <Text style={styles.message}>👋 Hi there! Welcome to Chowkpe!</Text>
-          <Text style={styles.dateText}>25 Jan 24</Text>
+          <Text style={styles.dateText}>{formatDate(today)}</Text>
         </View>
         <View style={styles.section}>
           <HeadingBox name="Select Work Type" />
