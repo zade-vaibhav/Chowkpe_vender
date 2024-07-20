@@ -50,7 +50,7 @@ const JobDetailsScreen = ({ navigation, route }) => {
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <View style={styles.innerContainer}>
                     <View style={styles.headerContainer}>
-                    <Image source={typeof data.image === 'string' ? { uri: data.image } : data.image} style={styles.headerImage} />
+                        <Image source={typeof data.image === 'string' ? { uri: data.image } : data.image} style={styles.headerImage} />
                     </View>
                     <View style={styles.detailsContainer}>
                         <Text style={styles.title}>Job Detail</Text>
@@ -117,12 +117,14 @@ const JobDetailsScreen = ({ navigation, route }) => {
                     </View>
                 </View>
             </ScrollView>
-            <TouchableOpacity
-                style={styles.footerButton}
-                onPress={() => navigation.navigate('WorkerListScreen')}
-            >
-                <Text style={styles.footerButtonText}>Show Workers</Text>
-            </TouchableOpacity>
+            <View style={styles.footer}>
+                <TouchableOpacity
+                    style={styles.footerButton}
+                    onPress={() => navigation.navigate('WorkerListScreen')}
+                >
+                    <Text style={styles.footerButtonText}>Show Workers</Text>
+                </TouchableOpacity>
+            </View>
         </View>
     );
 };
@@ -189,6 +191,11 @@ const styles = StyleSheet.create({
         marginBottom: 2,
         color: "gray",
     },
+    footer: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 10,
+    },
     valuedetail: {
         fontSize: 14,
         marginBottom: '2%',
@@ -202,8 +209,8 @@ const styles = StyleSheet.create({
         padding: 15,
         alignItems: 'center',
         justifyContent: 'center',
-        width: '100%',
-
+        width: '70%',
+        borderRadius: 10,
     },
     footerButtonText: {
         color: 'white',

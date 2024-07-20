@@ -11,8 +11,17 @@ import {
 import Swiper from "react-native-swiper";
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
-import { format, addDays, isSameDay } from "date-fns";
-import DateTimePickerModal from "react-native-modal-datetime-picker";
+import {
+  format,
+  addDays,
+  isSameDay,
+  startOfMonth,
+  endOfMonth,
+  addMonths,
+  subMonths,
+} from "date-fns";
+// import DateTimePickerModal from "react-native-modal-datetime-picker";
+import Icon from "react-native-vector-icons/FontAwesome";
 
 const { width, height } = Dimensions.get("window");
 
@@ -21,26 +30,26 @@ const TaskListScreen = ({ carouselData = [], taskData = [] }) => {
   const [selectedDateStr, setSelectedDateStr] = useState(
     format(new Date(), "dd/MM/yy")
   );
-  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  // const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const navigation = useNavigation();
 
   const handleCreateTask = () => {
     navigation.navigate("Create Task");
   };
 
-  const showDatePicker = () => {
-    setDatePickerVisibility(true);
-  };
+  // const showDatePicker = () => {
+  //   setDatePickerVisibility(true);
+  // };
 
-  const hideDatePicker = () => {
-    setDatePickerVisibility(false);
-  };
+  // const hideDatePicker = () => {
+  //   setDatePickerVisibility(false);
+  // };
 
-  const handleConfirm = (date) => {
-    setSelectedDate(date);
-    setSelectedDateStr(format(date, "dd/MM/yy"));
-    hideDatePicker();
-  };
+  // const handleConfirm = (date) => {
+  //   setSelectedDate(date);
+  //   setSelectedDateStr(format(date, "dd/MM/yy"));
+  //   hideDatePicker();
+  // };
 
   const defaultCarouselData = [
     {
@@ -170,7 +179,25 @@ const TaskListScreen = ({ carouselData = [], taskData = [] }) => {
     },
   ];
 
-  const dates = Array.from({ length: 30 }, (_, i) => addDays(new Date(), i));
+  // const dates = Array.from({ length: 30 }, (_, i) => addDays(new Date(), i));
+
+  const generateMonthDates = (date) => {
+    const start = startOfMonth(date);
+    const end = endOfMonth(date);
+    const dates = [];
+    for (let day = start; day <= end; day = addDays(day, 1)) {
+      dates.push(day);
+    }
+    return dates;
+  };
+
+  const [monthDates, setMonthDates] = useState(generateMonthDates(new Date()));
+
+  const changeMonth = (date) => {
+    setMonthDates(generateMonthDates(date));
+    setSelectedDate(date);
+    setSelectedDateStr(format(date, "dd/MM/yy"));
+  };
 
   const filterTasksByDate = (tasks, dateStr) => {
     return tasks.filter((task) => task.startDate === dateStr);
@@ -270,6 +297,9 @@ const TaskListScreen = ({ carouselData = [], taskData = [] }) => {
           showsButtons={false}
           dotStyle={styles.dotStyle}
           activeDotStyle={styles.activeDotStyle}
+          autoplay
+          autoplayTimeout={5}
+          showsPagination={false}
         >
           {(carouselData.length ? carouselData : defaultCarouselData).map(
             (item) => (
@@ -287,19 +317,33 @@ const TaskListScreen = ({ carouselData = [], taskData = [] }) => {
         <View style={styles.dateHeader}>
           <Text style={styles.dateLabel}>Date</Text>
           <View style={styles.dateSelector}>
-            <TouchableOpacity onPress={showDatePicker}>
-              <Image
-                source={require("../../assets/calendar_icon.png")}
-                style={styles.calendarIcon}
+            <TouchableOpacity
+              onPress={() => changeMonth(subMonths(selectedDate, 1))}
+            >
+              <Icon
+                name="chevron-left"
+                size={20}
+                color="#3B82F6"
+                style={styles.icon}
               />
             </TouchableOpacity>
-            <Text style={styles.currentMonthYear}>
+            <Text style={styles.monthYearText}>
               {format(selectedDate, "MMMM yyyy")}
             </Text>
+            <TouchableOpacity
+              onPress={() => changeMonth(addMonths(selectedDate, 1))}
+            >
+              <Icon
+                name="chevron-right"
+                size={20}
+                color="#3B82F6"
+                style={styles.icon}
+              />
+            </TouchableOpacity>
           </View>
         </View>
         <FlatList
-          data={dates}
+          data={monthDates}
           renderItem={renderDateItem}
           keyExtractor={(item) => item.toString()}
           horizontal
@@ -324,12 +368,12 @@ const TaskListScreen = ({ carouselData = [], taskData = [] }) => {
       <TouchableOpacity style={styles.fab} onPress={handleCreateTask}>
         <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>
-      <DateTimePickerModal
+      {/* <DateTimePickerModal
         isVisible={isDatePickerVisible}
         mode="date"
         onConfirm={handleConfirm}
         onCancel={hideDatePicker}
-      />
+      /> */}
     </View>
   );
 };
@@ -489,7 +533,10 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     paddingHorizontal: 16,
-    paddingBottom: 100, // adjust as needed
+    paddingBottom: 100,
+  },
+  icon: {
+    marginHorizontal: 10,
   },
   fab: {
     position: "absolute",
