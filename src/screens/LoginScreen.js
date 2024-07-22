@@ -1,16 +1,16 @@
 import React, { useState, useCallback } from 'react';
-import { StyleSheet, View, Text, Image, Dimensions, ScrollView, TouchableOpacity} from 'react-native';
+import { StyleSheet, View, Text, Image, Dimensions, ScrollView, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
 import IntlPhoneInput from 'react-native-intl-phone-input';
 
 const { width, height } = Dimensions.get('window');
 
-const LoginScreen = ({navigation}) => {
+const LoginScreen = ({ navigation }) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isValid, setIsValid] = useState(false);
-  const [phoneInputWidth, setPhoneInputWidth] = useState(width); 
+  const [phoneInputWidth, setPhoneInputWidth] = useState(width);
 
   const handlePhoneNumberChange = ({ phoneNumber, dialCode, unmaskedPhoneNumber, isVerified }) => {
-    const cleanedPhoneNumber = phoneNumber.replace(/\s+/g, ""); 
+    const cleanedPhoneNumber = phoneNumber.replace(/\s+/g, "");
     setPhoneNumber(cleanedPhoneNumber);
     const phoneRegex = /^\+\d{1,3}\d{11}$/;
     if (phoneRegex.test(dialCode + unmaskedPhoneNumber)) {
@@ -20,18 +20,21 @@ const LoginScreen = ({navigation}) => {
     }
   };
 
-  
   const handleLayout = useCallback((event) => {
     const { width } = event.nativeEvent.layout;
     setPhoneInputWidth(width);
   }, []);
 
-  const handleVerify = ()=>{
-     navigation.navigate("OtpNew")
-  }
+  const handleVerify = () => {
+    navigation.navigate("OtpNew");
+  };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 40 : 0}
+    >
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <Image
           source={require("../../assets/LoginScreen.png")}
@@ -55,17 +58,17 @@ const LoginScreen = ({navigation}) => {
             />
           </View>
         </View>
+        <View style={styles.buttonWrapper}>
+          <TouchableOpacity
+            style={[styles.button, { width: phoneInputWidth, backgroundColor: isValid ? '#007BFF' : '#ccc' }]}
+            disabled={!isValid}
+            onPress={handleVerify}
+          >
+            <Text style={styles.buttonText}>Verify</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
-      <View style={styles.buttonWrapper}>
-        <TouchableOpacity 
-          style={[styles.button, { width: phoneInputWidth, backgroundColor: isValid ? '#007BFF' : '#ccc' }]} 
-          disabled={!isValid} 
-          onPress={handleVerify}
-        >
-          <Text style={styles.buttonText}>Verify</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -75,9 +78,9 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flexGrow: 1,
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingBottom: 80, 
+    paddingBottom: 20,
   },
   image: {
     width: '100%',
@@ -132,11 +135,10 @@ const styles = StyleSheet.create({
     height: 50,
   },
   buttonWrapper: {
-    position: 'absolute',
-    bottom: 0,
     width: '100%',
-    alignItems: 'center', 
-    paddingHorizontal: 20, 
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 20,
   },
   button: {
     padding: 15,
