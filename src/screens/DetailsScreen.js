@@ -8,15 +8,17 @@ import {
   Image,
   TextInput,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import * as ImagePicker from "expo-image-picker";
 import * as DocumentPicker from "expo-document-picker";
 import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const formatDate = (date) => {
-  const options = { day: '2-digit', month: 'short', year: '2-digit' };
-  return date.toLocaleDateString('en-GB', options);
+  const options = { day: "2-digit", month: "short", year: "2-digit" };
+  return date.toLocaleDateString("en-GB", options);
 };
 
 const RequestCallbackBox = () => {
@@ -49,38 +51,64 @@ const HeadingBox = (props) => {
 const DetailsScreen = ({ route, navigation }) => {
   const today = new Date();
   const { skill } = route.params;
-  const [workType, setWorkType] = useState(skill?.workType || "");
-  const [selectedDate, setSelectedDate] = useState(skill?.startingDate || "");
-  const [location, setLocation] = useState(skill?.Address || "");
-  const [workers, setWorkers] = useState(skill?.workerNumber || "");
-  const [description, setDescription] = useState(skill?.desc || "");
-  const [selectedImages, setSelectedImages] = useState(Array.isArray(skill?.jobPhotos) ? skill.jobPhotos.map(photo => (typeof photo === "number" ? Image.resolveAssetSource(photo).uri : photo)) : []);
+  const [workType, setWorkType] = useState(skill?.workingPeriod || "");
+  const [selectedDate, setSelectedDate] = useState(
+    skill?.workStartingPeriod || ""
+  );
+  const [location, setLocation] = useState(skill?.addressLocation || "");
+  const [workers, setWorkers] = useState(skill?.numberOfWorkers || "");
+  const [description, setDescription] = useState(skill?.jobDescription || "");
+  const [selectedImages, setSelectedImages] = useState(
+    Array.isArray(skill?.jobPhotos)
+      ? skill.jobPhotos.map((photo) =>
+          typeof photo === "number"
+            ? Image.resolveAssetSource(photo).uri
+            : photo
+        )
+      : []
+  );
+  // console.log(selectedImages);
   const [salary, setSalary] = useState(skill?.salaryRange || "");
-  const [pf, setPf] = useState(skill?.PF || "");
-  const [esi, setEsi] = useState(skill?.ESI || "");
-  const [food, setFood] = useState(skill?.Food || "");
-  const [accomodation, setAccomodation] = useState(skill.Accomodation || "");
+  const [pf, setPf] = useState(skill?.pf || null);
+  const [esi, setEsi] = useState(skill?.esi || null);
+  const [food, setFood] = useState(skill?.food || null);
+  const [accomodation, setAccomodation] = useState(skill.accommodation || null);
 
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const [dropdownVisibleDocument, setDropdownVisibleDocument] = useState(false);
   const [dropdownVisibleCategory, setDropdownVisibleCategory] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(skill?.startingDate || "Select Starting Date");
-  const [selectedDocument, setSelectedDocument] = useState(skill?.requiredDocuments || "Select Document");
-  const [selectedCategory, setSelectedCategory] = useState(skill?.hireCategory || "Select Category");
+  const [selectedItem, setSelectedItem] = useState(
+    skill?.workStartingPeriod || "Select Starting Date"
+  );
+  const [selectedDocument, setSelectedDocument] = useState(
+    skill?.documentsRequired || "Select Document"
+  );
+  const [selectedCategory, setSelectedCategory] = useState(
+    skill?.hireCategory || "Select Category"
+  );
 
-  const [workerNumber, setWorkerNumber] = useState(skill?.workerNumber || "");
-  const [address, setAddress] = useState(skill?.Address || "");
-  const [desc, setDesc] = useState(skill?.desc || "");
+  const [workerNumber, setWorkerNumber] = useState(
+    skill?.numberOfWorkers || ""
+  );
+  const [address, setAddress] = useState(skill?.addressLocation || "");
+  const [desc, setDesc] = useState(skill?.jobDescription || "");
   const [salaryRange, setSalaryRange] = useState(skill?.salaryRange || "");
   const [isAdding, setIsAdding] = useState(false);
   const dates = [
-    "Immediately",
-    "Within 10 Days",
+    "Immediate",
+    "Within 10 days",
     "Within 15 days",
-    "Within 1 month",
+    "Within 30 days",
   ];
   const requiredDocuments = ["ID Proof", "Address Proof"];
-  const hireCategories = ["Cleaner", "Shipping", "Picker", "Forklift Operator", "Sorter", "Assemble Line Worker"];
+  const hireCategories = [
+    "Cleaner",
+    "Shipping",
+    "Picker",
+    "Forklift Operator",
+    "Sorter",
+    "Assemble Line Worker",
+  ];
 
   const toggleDropdown = () => {
     setDropdownVisible(!dropdownVisible);
@@ -141,7 +169,7 @@ const DetailsScreen = ({ route, navigation }) => {
   const openCamera = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== "granted") {
-      alert("Sorry, we need camera permissions to make this work!");
+      Alert.alert("Sorry, we need camera permissions to make this work!");
       return;
     }
 
@@ -186,7 +214,7 @@ const DetailsScreen = ({ route, navigation }) => {
       Alert.alert("Please enter a valid location with at least 10 characters.");
       return;
     }
-    if (!workerNumber.trim()) {
+    if (!workerNumber) {
       Alert.alert("Please enter a worker Number.");
       return;
     }
@@ -217,84 +245,89 @@ const DetailsScreen = ({ route, navigation }) => {
       return;
     }
     const salaryRangePattern = /^(\d+)(-\d+)?$/;
-  if (!salaryRange.trim()) {
-    Alert.alert("Please select salary range.");
-    return;
-  }
-  const salaryRangeMatch = salaryRange.trim().match(salaryRangePattern);
-  if (!salaryRangeMatch) {
-    Alert.alert("Please enter a valid salary range (e.g., 1000 or 10000-20000).");
-    return;
-  }
-  const [_, minSalary, maxSalary] = salaryRangeMatch;
-  if (parseInt(minSalary) < 1000) {
-    Alert.alert("Minimum salary should be 1000 or greater.");
-    return;
-  }
-  if (maxSalary && parseInt(maxSalary.slice(1)) < 1000) { 
-    Alert.alert("Maximum salary should be 1000 or greater.");
-    return;
-  }
-    if (!pf) {
+    if (!salaryRange.trim()) {
+      Alert.alert("Please select salary range.");
+      return;
+    }
+    const salaryRangeMatch = salaryRange.trim().match(salaryRangePattern);
+    if (!salaryRangeMatch) {
+      Alert.alert(
+        "Please enter a valid salary range (e.g., 1000 or 10000-20000)."
+      );
+      return;
+    }
+    const [_, minSalary, maxSalary] = salaryRangeMatch;
+    if (parseInt(minSalary) < 1000) {
+      Alert.alert("Minimum salary should be 1000 or greater.");
+      return;
+    }
+    if (maxSalary && parseInt(maxSalary.slice(1)) < 1000) {
+      Alert.alert("Maximum salary should be 1000 or greater.");
+      return;
+    }
+    if (pf == null) {
       Alert.alert("Please select PF confimation.");
       return;
     }
-    if (!esi) {
+    if (esi == null) {
       Alert.alert("Please select ESI confimation.");
       return;
     }
-    if (!food) {
+    if (food == null) {
       Alert.alert("Please select Food confimation.");
       return;
     }
-    if (!accomodation) {
+    if (accomodation == null) {
       Alert.alert("Please select accomodation confimation.");
       return;
     }
 
     setIsAdding(true);
     const formData = new FormData();
-    formData.append("workType", workType);
-    formData.append("selectedDate", selectedDate);
-    formData.append("address", address);
-    formData.append("workerNumber", workerNumber);
-    formData.append("desc", desc);
-    selectedImages.forEach((imageUri, index) => {
-      formData.append(`image_${index}`, {
-        uri: imageUri,
-        type: "image/jpeg",
-        name: `image_${index}.${imageUri.split(".").pop()}`,
-      });
-    });
-    formData.append("selectedDocuments", selectedDocument);
-    formData.append("selectedCategory", selectedCategory);
+    formData.append("workingPeriod", workType);
+    formData.append("workStartingPeriod", selectedDate);
+    formData.append("addressLocation", address);
+    formData.append("numberOfWorkers", workerNumber);
+    formData.append("jobDescription", desc);
+    // selectedImages.forEach((imageUri, index) => {
+    //   formData.append(`jobPhotos`, {
+    //     uri: imageUri,
+    //     type: "image/jpeg",
+    //     name: `image_${index}.${imageUri.split(".").pop()}`,
+    //   });
+    // });
+    formData.append("jobPhotos", selectedImages);
+    formData.append("documentsRequired", selectedDocument);
+    formData.append("hireCategory", selectedCategory);
     formData.append("salaryRange", salaryRange);
     formData.append("pf", pf);
     formData.append("esi", esi);
     formData.append("food", food);
-    formData.append("accomodation", accomodation);
+    formData.append("accommodation", accomodation);
 
-    console.log("FormData: ", formData);
+    const token = await AsyncStorage.getItem("uid");
+    if (!token) {
+      Alert.alert("token is not valid please try again");
+      return;
+    }
 
     try {
       const response = await fetch(
         "https://chowkpe-server.onrender.com/api/v1/admin/tasks/create",
         {
           method: "POST",
-          // headers: {
-          //   "Content-Type": "multipart/form-data",
-          // },
+          headers: {
+            // "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
           body: formData,
         }
       );
-
+      const data = await response.json();
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
-
-      const data = await response.json();
-      alert("Task created successfully");
-      console.log(data);
+      Alert.alert("Task created successfully");
       setWorkType("");
       setSelectedDate("");
       setAddress("");
@@ -307,7 +340,9 @@ const DetailsScreen = ({ route, navigation }) => {
       setPf("");
       setEsi("");
       setFood("");
-      setAccomodation("")
+      setAccomodation("");
+
+      navigation.navigate("BottomNavigator");
     } catch (error) {
       console.error("Fetch Error:", error);
     } finally {
@@ -318,23 +353,20 @@ const DetailsScreen = ({ route, navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.headingContainer}>
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => navigation.goBack()}
-      >
-        <Icon name="arrow-back" size={24} color="black" />
-      </TouchableOpacity>
-      <Text style={styles.heading}>Details</Text>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Icon name="arrow-back" size={24} color="black" />
+        </TouchableOpacity>
+        <Text style={styles.heading}>Details</Text>
       </View>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContainer}
       >
         <View style={styles.imageContainer}>
-          <Image
-            source={skill.image}
-            style={styles.operatorImage}
-          />
+          <Image source={skill.image} style={styles.operatorImage} />
         </View>
         <View style={styles.header}>
           <Text style={styles.headerText}>{skill.title}</Text>
@@ -370,17 +402,17 @@ const DetailsScreen = ({ route, navigation }) => {
             <TouchableOpacity
               style={[
                 styles.button,
-                workType === "Part Time" && styles.selectedButton,
+                workType === "Short Time" && styles.selectedButton,
               ]}
-              onPress={() => setWorkType("Part Time")}
+              onPress={() => setWorkType("Short Time")}
             >
               <Text
                 style={[
                   styles.buttonText,
-                  workType === "Part Time" && styles.selectedButtonText,
+                  workType === "Short Time" && styles.selectedButtonText,
                 ]}
               >
-                Part Time
+                Short Time
               </Text>
             </TouchableOpacity>
           </View>
@@ -621,39 +653,41 @@ const DetailsScreen = ({ route, navigation }) => {
           <HeadingBox name="PF" />
           <View style={styles.buttonGroup}>
             <TouchableOpacity
-              style={[styles.button, pf === "Yes" && styles.selectedButton]}
-              onPress={() => setPf("Yes")}
+              style={[styles.button, pf === true && styles.selectedButton]}
+              onPress={() => setPf(true)}
             >
               <Text
                 style={[
                   styles.buttonText,
-                  pf === "Yes" && styles.selectedButtonText,
+                  pf === true && styles.selectedButtonText,
                 ]}
               >
                 Yes
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.button, pf === "No" && styles.selectedButton]}
-              onPress={() => setPf("No")}
+              style={[styles.button, pf === false && styles.selectedButton]}
+              onPress={() => setPf(false)}
             >
               <Text
                 style={[
                   styles.buttonText,
-                  pf === "No" && styles.selectedButtonText,
+                  pf === false && styles.selectedButtonText,
                 ]}
               >
                 No
               </Text>
             </TouchableOpacity>
           </View>
-          {pf && (
+          {pf !== null && (
             <View style={styles.selectedWorkTypeContainer}>
               <TouchableOpacity style={styles.editIconContainer}>
                 <Icon name="pencil" size={16} color="gray" />
               </TouchableOpacity>
               <View style={styles.workTypeTextContainer}>
-                <Text style={styles.selectedWorkTypeText}>{pf}</Text>
+                <Text style={styles.selectedWorkTypeText}>
+                  {pf == true ? "Yes" : "No"}
+                </Text>
               </View>
             </View>
           )}
@@ -662,39 +696,42 @@ const DetailsScreen = ({ route, navigation }) => {
           <HeadingBox name="ESI" />
           <View style={styles.buttonGroup}>
             <TouchableOpacity
-              style={[styles.button, esi === "Yes" && styles.selectedButton]}
-              onPress={() => setEsi("Yes")}
+              style={[styles.button, esi === true && styles.selectedButton]}
+              onPress={() => setEsi(true)}
             >
               <Text
                 style={[
                   styles.buttonText,
-                  esi === "Yes" && styles.selectedButtonText,
+                  esi === true && styles.selectedButtonText,
                 ]}
               >
                 Yes
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.button, esi === "No" && styles.selectedButton]}
-              onPress={() => setEsi("No")}
+              style={[styles.button, esi === false && styles.selectedButton]}
+              onPress={() => setEsi(false)}
             >
               <Text
                 style={[
                   styles.buttonText,
-                  esi === "No" && styles.selectedButtonText,
+                  esi === false && styles.selectedButtonText,
                 ]}
               >
                 No
               </Text>
             </TouchableOpacity>
           </View>
-          {esi && (
+          {esi !== null && (
             <View style={styles.selectedWorkTypeContainer}>
               <TouchableOpacity style={styles.editIconContainer}>
                 <Icon name="pencil" size={16} color="gray" />
               </TouchableOpacity>
               <View style={styles.workTypeTextContainer}>
-                <Text style={styles.selectedWorkTypeText}>{esi}</Text>
+                <Text style={styles.selectedWorkTypeText}>
+                  {esi == true ? "Yes" : "No"}
+                  {console.log(esi)}
+                </Text>
               </View>
             </View>
           )}
@@ -703,39 +740,41 @@ const DetailsScreen = ({ route, navigation }) => {
           <HeadingBox name="Food" />
           <View style={styles.buttonGroup}>
             <TouchableOpacity
-              style={[styles.button, food === "Yes" && styles.selectedButton]}
-              onPress={() => setFood("Yes")}
+              style={[styles.button, food === true && styles.selectedButton]}
+              onPress={() => setFood(true)}
             >
               <Text
                 style={[
                   styles.buttonText,
-                  food === "Yes" && styles.selectedButtonText,
+                  food === true && styles.selectedButtonText,
                 ]}
               >
                 Yes
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.button, food === "No" && styles.selectedButton]}
-              onPress={() => setFood("No")}
+              style={[styles.button, food === false && styles.selectedButton]}
+              onPress={() => setFood(false)}
             >
               <Text
                 style={[
                   styles.buttonText,
-                  food === "No" && styles.selectedButtonText,
+                  food === false && styles.selectedButtonText,
                 ]}
               >
                 No
               </Text>
             </TouchableOpacity>
           </View>
-          {food && (
+          {food !== null && (
             <View style={styles.selectedWorkTypeContainer}>
               <TouchableOpacity style={styles.editIconContainer}>
                 <Icon name="pencil" size={16} color="gray" />
               </TouchableOpacity>
               <View style={styles.workTypeTextContainer}>
-                <Text style={styles.selectedWorkTypeText}>{food}</Text>
+                <Text style={styles.selectedWorkTypeText}>
+                  {food == true ? "Yes" : "No"}
+                </Text>
               </View>
             </View>
           )}
@@ -746,14 +785,14 @@ const DetailsScreen = ({ route, navigation }) => {
             <TouchableOpacity
               style={[
                 styles.button,
-                accomodation === "Yes" && styles.selectedButton,
+                accomodation === true && styles.selectedButton,
               ]}
-              onPress={() => setAccomodation("Yes")}
+              onPress={() => setAccomodation(true)}
             >
               <Text
                 style={[
                   styles.buttonText,
-                  accomodation === "Yes" && styles.selectedButtonText,
+                  accomodation === true && styles.selectedButtonText,
                 ]}
               >
                 Yes
@@ -762,38 +801,50 @@ const DetailsScreen = ({ route, navigation }) => {
             <TouchableOpacity
               style={[
                 styles.button,
-                accomodation === "No" && styles.selectedButton,
+                accomodation === false && styles.selectedButton,
               ]}
-              onPress={() => setAccomodation("No")}
+              onPress={() => setAccomodation(false)}
             >
               <Text
                 style={[
                   styles.buttonText,
-                  accomodation === "No" && styles.selectedButtonText,
+                  accomodation === false && styles.selectedButtonText,
                 ]}
               >
                 No
               </Text>
             </TouchableOpacity>
           </View>
-          {accomodation && (
+          {accomodation !== null && (
             <View style={styles.selectedWorkTypeContainer}>
               <TouchableOpacity style={styles.editIconContainer}>
                 <Icon name="pencil" size={16} color="gray" />
               </TouchableOpacity>
               <View style={styles.workTypeTextContainer}>
-                <Text style={styles.selectedWorkTypeText}>{accomodation}</Text>
+                <Text style={styles.selectedWorkTypeText}>
+                  {accomodation === true ? "Yes" : "No"}
+                </Text>
               </View>
             </View>
           )}
         </View>
         <View style={styles.section}>
-          <TouchableOpacity
-            style={[styles.submitButton]}
-            onPress={handleSubmit}
-          >
-            <Text style={styles.submitButtonText}>Submit</Text>
-          </TouchableOpacity>
+          {isAdding ? (
+            <TouchableOpacity style={[styles.submitButton]}>
+              <ActivityIndicator
+                size="small"
+                color="#000"
+                style={styles.spinner}
+              />
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              style={[styles.submitButton]}
+              onPress={handleSubmit}
+            >
+              <Text style={styles.submitButtonText}>Submit</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </ScrollView>
     </View>
@@ -819,7 +870,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginVertical: 16,
     padding: 10,
-    color:"black"
+    color: "black",
   },
   scrollContainer: {
     flexGrow: 1,
@@ -852,7 +903,7 @@ const styles = StyleSheet.create({
   operatorImage: {
     width: "90%",
     height: 200,
-    resizeMode: "contain"
+    resizeMode: "contain",
   },
   header: {
     marginBottom: 20,
