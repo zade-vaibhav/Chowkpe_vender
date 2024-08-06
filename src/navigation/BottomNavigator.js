@@ -3,6 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { View, Text } from 'react-native';
 import TaskListScreen from '../screens/TaskListScreen'
+import ProfileScreen from '../screens/ProfileScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -11,11 +12,9 @@ const HrmsScreen = () => (
     <Text>Hrms Screen</Text>
   </View>
 );
-const ProfileScreen = () => (
-  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-    <Text>Profile Screen</Text>
-  </View>
-);
+
+
+
 
 const BottomNavigtor = () => {
   return (

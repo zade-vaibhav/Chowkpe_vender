@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -9,88 +9,54 @@ import {
   Image,
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
-import { LinearGradient } from 'expo-linear-gradient';
+import { LinearGradient } from "expo-linear-gradient";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const { width, height } = Dimensions.get("window");
 
 const CreateTask = ({ navigation }) => {
-  const [skills, setSkills] = useState([
-    {
-      id: 1,
-      title: "Deep Cleaning",
-      date: "2023-07-12",
-      image: require("../../assets/images/task/Task 1.png"),
-      isVideo: false,
-      workType: "Full Time",
-      startingDate: "Immediately",
-      Address: "Yamunagar Haryana",
-      workerNumber: "10",
-      desc: "Not Applicable",
-      jobPhotos: [
-        require("../../assets/images/task/Task 1.png")
-      ],
-      requiredDocuments: "Address Proof",
-      hireCategory: "Forklift Operator",
-      salaryRange: "12000-17000",
-      PF: "No",
-      ESI: "No",
-      Food: "Yes",
-      Accomodation: "Yes"    
-    },
-    {
-      id: 2,
-      title: "Warehouse",
-      date: "2024-07-13",
-      image: require("../../assets/images/task/Frame.png"),
-      isVideo: true,
-      workType: "Part Time",
-      startingDate: "Within 10 Days",
-      Address: "Sasrsawa Saharanpur",
-      workerNumber: "4",
-      desc: "Nothing Much",
-      jobPhotos: [
-        require("../../assets/images/task/Frame.png")
-      ],
-      requiredDocuments: "ID Proof",
-      hireCategory: "Cleaner",
-      salaryRange: "10000-20000",
-      PF: "Yes",
-      ESI: "No",
-      Food: "Yes",
-      Accomodation: "Yes"    
-    },
-    {
-      id: 3,
-      title: "Event Job",
-      date: "2024-07-14",
-      image: require("../../assets/images/task/Task 3.png"),
-      isVideo: false,
-      workType: "Full Time",
-      startingDate: "Within 15 Days",
-      Address: "Gurgaon Haryana",
-      workerNumber: "6",
-      desc: "Can be describe later",
-      jobPhotos: [
-        require("../../assets/images/task/Frame.png"),
-        require("../../assets/images/task/Task 3.png")
-      ],
-      requiredDocuments: "ID Proof",
-      hireCategory: "Shipping",
-      salaryRange: "15000-22000",
-      PF: "Yes",
-      ESI: "Yes",
-      Food: "No",
-      Accomodation: "No"
-    },
-  ]);
+  const [skills, setSkills] = useState([]);
 
   const handleNewTask = () => {
-    navigation.navigate('Select Category');
+    navigation.navigate("Select Category");
   };
 
   const handleRebook = (skill) => {
-    navigation.navigate('Details Screen', { skill });
+    navigation.navigate("Details Screen", { skill });
   };
+
+  const previousTask = async () => {
+    const token = await AsyncStorage.getItem("uid");
+    try {
+      const response = await fetch(
+        "https://chowkpe-server.onrender.com/api/v1/vender/allTask",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.success === true) {
+        const tasks = data.tasks.map((taskObj) => taskObj.task);
+        setSkills(tasks);
+      } else {
+        console.log("Failed to fetch tasks");
+        setSkills([]);
+      }
+    } catch (error) {
+      console.log("Error fetching tasks:", error);
+      setSkills([]);
+    }
+  };
+
+  useEffect(() => {
+    previousTask();
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -104,17 +70,17 @@ const CreateTask = ({ navigation }) => {
         <Text style={styles.heading}>Create new task</Text>
       </View>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {skills.map((skill) => (
-          <View key={skill.id} style={styles.card}>
+        {skills?.map((skill, index) => (
+          <View key={index} style={styles.card}>
             <LinearGradient
-              colors={['#fff', '#e0f7fa']} 
-              start={{ x: 0, y: 0 }} 
-              end={{ x: 1, y: 0 }} 
+              colors={["#fff", "#e0f7fa"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
               style={styles.cardGradient}
             >
               <View style={styles.cardLeft}>
-                <Text style={styles.cardTitle}>{skill.title}</Text>
-                <Text style={styles.cardDate}>{skill.date}</Text>
+                <Text style={styles.cardTitle}>Job-Discription : {skill.jobDescription}</Text>
+                <Text style={styles.cardDate}>Starting-Period : {skill.workStartingPeriod}</Text>
                 <TouchableOpacity
                   style={styles.rebookButton}
                   onPress={() => handleRebook(skill)}
@@ -122,16 +88,16 @@ const CreateTask = ({ navigation }) => {
                   <Text style={styles.rebookButtonText}>Rebook</Text>
                 </TouchableOpacity>
               </View>
-              <TouchableOpacity
-                style={styles.cardRight}
-                onPress={() => {}}
-              >
-                <Image source={skill.image} style={styles.cardImage} />
-                {skill.isVideo && (
+              <TouchableOpacity style={styles.cardRight} onPress={() => {}}>
+                {/* <Image
+                  source={{ uri: skill.jobPhotos[0] }}
+                  style={styles.cardImage}
+                /> */}
+                {/* {skill.isVideo && (
                   <View style={styles.playIconContainer}>
                     <Icon name="play-circle" size={40} color="white" />
                   </View>
-                )}
+                )} */}
               </TouchableOpacity>
             </LinearGradient>
           </View>
@@ -190,7 +156,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     borderRadius: 8,
     marginVertical: 10,
-    overflow: 'hidden', 
+    overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -199,8 +165,8 @@ const styles = StyleSheet.create({
   },
   cardGradient: {
     flex: 1,
-    flexDirection: 'row',
-    backgroundColor: '#fff',
+    flexDirection: "row",
+    backgroundColor: "#fff",
   },
   cardLeft: {
     flex: 1,

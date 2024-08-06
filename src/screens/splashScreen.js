@@ -1,9 +1,11 @@
-import React, { useCallback } from "react";
-import { View, Text, StyleSheet, BackHandler, Image } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import { View, Text, StyleSheet, BackHandler, Image,ActivityIndicator,Alert } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 // import Logo from "../assets/images/provider/chowkpeLogo.png";
 
 const SplashScreen = ({ navigation }) => {
+
   const backAction = () => {
     BackHandler.exitApp();
     return true;
@@ -20,6 +22,8 @@ const SplashScreen = ({ navigation }) => {
   setTimeout(() => {
     navigation.replace("Welcome");
   }, 2000);
+
+
 
   return (
     <View style={styles.container}>

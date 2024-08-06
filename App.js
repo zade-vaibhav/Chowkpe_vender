@@ -12,7 +12,7 @@ import DetailsScreen from "./src/screens/DetailsScreen";
 import WorkerProfileScreen from "./src/screens/WorkerProfileScreen";
 import TaskDetail from "./src/screens/TaskDetail";
 import WorkersListScreen from "./src/screens/WorkerListScreen";
-import FirstRoute from "./src/screens/FirstRoute";
+import CompanyDetailsScreen from "./src/screens/CompanyDetailsScreen";
 
 const Stack = createStackNavigator();
 
@@ -45,11 +45,11 @@ export default function App() {
          <Stack.Screen name="BottomNavigator" component={BottomNavigtor} />
          <Stack.Screen name="Create Task" component={CreateTask} />
          <Stack.Screen name="TaskDetail" component={TaskDetail} />
-         <Stack.Screen name="First Route" component={FirstRoute} />
          <Stack.Screen name="WorkerListScreen" component={WorkersListScreen} />
          <Stack.Screen name="WorkerProfile" component={WorkerProfileScreen} />
          <Stack.Screen name="Select Category" component={CategoryScreen}  />
          <Stack.Screen name="Details Screen" component={DetailsScreen} />
+         <Stack.Screen name="Company Details" component={CompanyDetailsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

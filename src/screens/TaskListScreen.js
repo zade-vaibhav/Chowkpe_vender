@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,9 +7,13 @@ import {
   TouchableOpacity,
   FlatList,
   Dimensions,
+  Alert,
+  ActivityIndicator,
+  Switch,
+  Pressable
 } from "react-native";
 import Swiper from "react-native-swiper";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import {
   format,
@@ -22,10 +26,16 @@ import {
 } from "date-fns";
 // import DateTimePickerModal from "react-native-modal-datetime-picker";
 import Icon from "react-native-vector-icons/FontAwesome";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const { width, height } = Dimensions.get("window");
 
 const TaskListScreen = ({ carouselData = [], taskData = [] }) => {
+  const [mytask, setMyTask] = useState([])
+  const [refresh, setRefresh] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [isRefresh, setIsRefresh] = useState(false);
+  const [isChange, setIsChange] = useState(false)
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedDateStr, setSelectedDateStr] = useState(
     format(new Date(), "dd/MM/yy")
@@ -37,19 +47,50 @@ const TaskListScreen = ({ carouselData = [], taskData = [] }) => {
     navigation.navigate("Create Task");
   };
 
-  // const showDatePicker = () => {
-  //   setDatePickerVisibility(true);
-  // };
+  async function getMyTask() {
+    setLoading(true)
+    const token = await AsyncStorage.getItem("uid");
+    try {
+      const requestOptions = {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        }
+      };
+      const response = await fetch('https://chowkpe-server.onrender.com/api/v1/vender/allTask', requestOptions);
+      const data = await response.json()
+      if (data.success == true) {
+        setLoading(false)
+        setMyTask(data.tasks)
+      } else {
+        setLoading(false)
+      }
+    } catch (err) {
+      Alert.alert(err.message);
+    }
+  }
 
-  // const hideDatePicker = () => {
-  //   setDatePickerVisibility(false);
-  // };
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchDataAsync = async () => {
+        getMyTask()
+      };
 
-  // const handleConfirm = (date) => {
-  //   setSelectedDate(date);
-  //   setSelectedDateStr(format(date, "dd/MM/yy"));
-  //   hideDatePicker();
-  // };
+      fetchDataAsync();
+    }, [isRefresh])
+  );
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("focus", () => {
+      setIsRefresh(!isRefresh);
+    });
+    return unsubscribe;
+  }, [navigation]);
+
+  useEffect(() => {
+    getMyTask()
+  }, [refresh])
 
   const defaultCarouselData = [
     {
@@ -74,110 +115,12 @@ const TaskListScreen = ({ carouselData = [], taskData = [] }) => {
     },
   ];
 
-  const defaultTaskData = [
-    {
-      id: 1,
-      title: "Forklift Operator",
-      startDate: "24/03/23",
-      endDate: "24/03/23",
-      image: require("../../assets/Forklifter.png"),
-      workStartingPeriod: "24/03/23 - 24/03/23",
-      earningPerHour: "15 USD",
-      category: ["Logistics", "Warehouse"],
-      address: "123 Main St, City",
-      documentationRequired: ["ID Proof", "License"],
-      jobDescription: "Operate forklifts to load and unload materials.",
-      accommodation: true,
-      food: true,
-      esi: true,
-      pf: true,
-    },
-    {
-      id: 2,
-      title: "Cleaner",
-      startDate: "24/03/23",
-      endDate: "24/03/23",
-      image: require("../../assets/cleaner.png"),
-      workStartingPeriod: "24/03/23 - 24/03/23",
-      earningPerHour: "10 USD",
-      category: ["Cleaning"],
-      address: "456 Another St, City",
-      documentationRequired: ["ID Proof"],
-      jobDescription: "Clean and maintain facilities.",
-      accommodation: false,
-      food: true,
-      esi: false,
-      pf: false,
-    },
-    {
-      id: 3,
-      title: "Forklift Operator",
-      startDate: "24/03/23",
-      endDate: "24/03/23",
-      image: "https://via.placeholder.com/350x150",
-      workStartingPeriod: "24/03/23 - 24/03/23",
-      earningPerHour: "15 USD",
-      category: ["Logistics", "Warehouse"],
-      address: "789 Different St, City",
-      documentationRequired: ["ID Proof", "License"],
-      jobDescription: "Operate forklifts to load and unload materials.",
-      accommodation: true,
-      food: false,
-      esi: true,
-      pf: false,
-    },
-    {
-      id: 4,
-      title: "Painter",
-      startDate: "19/07/24",
-      endDate: "24/07/24",
-      image: "https://via.placeholder.com/350x150",
-      workStartingPeriod: "24/03/23 - 24/03/23",
-      earningPerHour: "20 USD",
-      category: ["Construction", "Maintenance"],
-      address: "101 Paint St, City",
-      documentationRequired: ["ID Proof"],
-      jobDescription: "Paint interior and exterior surfaces.",
-      accommodation: false,
-      food: true,
-      esi: false,
-      pf: true,
-    },
-    {
-      id: 5,
-      title: "Electrician",
-      startDate: "19/07/24",
-      endDate: "30/07/24",
-      image: "https://via.placeholder.com/350x150",
-      workStartingPeriod: "24/03/23 - 24/03/23",
-      earningPerHour: "25 USD",
-      category: ["Maintenance", "Construction"],
-      address: "202 Electric St, City",
-      documentationRequired: ["ID Proof", "Certification"],
-      jobDescription: "Install and repair electrical systems.",
-      accommodation: true,
-      food: true,
-      esi: true,
-      pf: true,
-    },
-    {
-      id: 6,
-      title: "Plumber",
-      startDate: "24/03/23",
-      endDate: "24/03/23",
-      image: "https://via.placeholder.com/350x150",
-      workStartingPeriod: "24/03/23 - 24/03/23",
-      earningPerHour: "18 USD",
-      category: ["Maintenance", "Construction"],
-      address: "303 Plumbing St, City",
-      documentationRequired: ["ID Proof", "Certification"],
-      jobDescription: "Install and repair plumbing systems.",
-      accommodation: false,
-      food: true,
-      esi: false,
-      pf: true,
-    },
-  ];
+
+
+  // formated date
+  function formatDate(dateString) {
+    return `${dateString.slice(8, 10)}/${dateString.slice(5, 7)}/${dateString.slice(2, 4)}`;
+  }
 
   // const dates = Array.from({ length: 30 }, (_, i) => addDays(new Date(), i));
 
@@ -199,19 +142,25 @@ const TaskListScreen = ({ carouselData = [], taskData = [] }) => {
     setSelectedDateStr(format(date, "dd/MM/yy"));
   };
 
+  // giving task with filtered date
   const filterTasksByDate = (tasks, dateStr) => {
-    return tasks.filter((task) => task.startDate === dateStr);
+    return tasks.filter((task) => formatDate(task.createdAt) === dateStr);
   };
 
-  const filteredTasks = useMemo(
-    () =>
-      filterTasksByDate(
-        taskData.length ? taskData : defaultTaskData,
-        selectedDateStr
-      ),
-    [selectedDateStr, taskData]
-  );
+  // return tasks that contain selected date
+  const filteredTasks = useMemo(() =>
+    filterTasksByDate(
+      taskData.length ? taskData : mytask,
+      selectedDateStr
+    ),
+    [selectedDateStr, taskData]);
 
+  const handleSwitchChange = () => {
+    setIsChange(!isChange);
+  };
+
+
+  // render date 
   const renderDateItem = ({ item }) => {
     const dayOfWeek = format(item, "EEE");
     const dayOfMonth = format(item, "dd");
@@ -233,8 +182,9 @@ const TaskListScreen = ({ carouselData = [], taskData = [] }) => {
       </TouchableOpacity>
     );
   };
+
   const renderTaskItem = ({ item }) => (
-    <TouchableOpacity
+    <Pressable
       onPress={() =>
         navigation.navigate("TaskDetail", {
           data: item,
@@ -249,48 +199,53 @@ const TaskListScreen = ({ carouselData = [], taskData = [] }) => {
           end={{ x: 1, y: 0 }}
           style={styles.cardGradient}
         >
-          <View style={styles.cardLeft}>
-            <Text style={styles.cardTitle}>{item.title}</Text>
-            <Text style={styles.cardDate}>Start Date: {item.startDate}</Text>
-            <Text style={styles.cardDate}>End Date: {item.endDate}</Text>
+          <View style={styles.cardContent}>
+            <View style={styles.cardLeft}>
+              <View style={styles.infoRow}>
+                <Text style={styles.cardLabel}>Work Start Period:</Text>
+                <Text style={styles.cardValue}>{item.task.workStartingPeriod}</Text>
+              </View>
+              <View style={styles.infoRow}>
+                <Text style={styles.cardLabel}>Category:</Text>
+                <Text style={styles.cardValue}>{item.task.hireCategory[0]}</Text>
+              </View>
+              <View style={styles.infoRow}>
+                <Text style={styles.cardLabel}>Location:</Text>
+                <Text style={styles.cardValue}>{item.task.addressLocation}</Text>
+              </View>
+            </View>
+            <TouchableOpacity style={styles.cardRight} onPress={() => { }}>
+              <Image
+                source={require("../../assets/images/skill/Vertical-Full.png")}
+                style={styles.cardImage}
+              />
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity style={styles.cardRight} onPress={() => {}}>
-            <Image
-              source={
-                typeof item.image === "string"
-                  ? { uri: item.image }
-                  : item.image
-              }
-              style={styles.cardImage}
-            />
-          </TouchableOpacity>
         </LinearGradient>
       </View>
-    </TouchableOpacity>
+    </Pressable>
   );
+
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Image
-          source={require("../../assets/chowkpe.png")}
-          style={styles.logo}
-        />
+        <View style={styles.headerLeft}>
+          <Image
+            source={require("../../assets/chowkpe.png")}
+            style={styles.logo}
+          />
+        </View>
         <View style={styles.headerRight}>
-          <TouchableOpacity onPress={() => {}}>
+          <TouchableOpacity onPress={() => { }}>
             <Image
               source={require("../../assets/Group298.png")}
               style={styles.notificationIcon}
             />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => {}}>
-            <Image
-              source={require("../../assets/Ellipse.png")}
-              style={styles.profileIcon}
-            />
-          </TouchableOpacity>
         </View>
       </View>
+
       <View style={styles.cont}>
         <Swiper
           style={styles.carousel}
@@ -313,61 +268,104 @@ const TaskListScreen = ({ carouselData = [], taskData = [] }) => {
           )}
         </Swiper>
       </View>
-      <View style={styles.calendarContainer}>
-        <View style={styles.dateHeader}>
-          <Text style={styles.dateLabel}>Date</Text>
-          <View style={styles.dateSelector}>
-            <TouchableOpacity
-              onPress={() => changeMonth(subMonths(selectedDate, 1))}
-            >
-              <Icon
-                name="chevron-left"
-                size={20}
-                color="#3B82F6"
-                style={styles.icon}
-              />
-            </TouchableOpacity>
-            <Text style={styles.monthYearText}>
-              {format(selectedDate, "MMMM yyyy")}
-            </Text>
-            <TouchableOpacity
-              onPress={() => changeMonth(addMonths(selectedDate, 1))}
-            >
-              <Icon
-                name="chevron-right"
-                size={20}
-                color="#3B82F6"
-                style={styles.icon}
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
-        <FlatList
-          data={monthDates}
-          renderItem={renderDateItem}
-          keyExtractor={(item) => item.toString()}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          initialNumToRender={5}
-          maxToRenderPerBatch={5}
-          windowSize={10}
-          contentContainerStyle={styles.dateStyle}
-        />
+      <View style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        marginLeft: 10
+      }}>
+        <Text style={styles.text}>Sorted task</Text>
+        <Switch value={isChange} onChange={() => handleSwitchChange()} />
+        <Text style={styles.text}>All task</Text>
       </View>
-      <FlatList
-        data={filteredTasks}
-        renderItem={renderTaskItem}
-        keyExtractor={(item) => item.id.toString()}
-        style={styles.taskList}
-        contentContainerStyle={styles.scrollContainer}
-        ListEmptyComponent={
-          <Text style={styles.noTaskText}>No tasks available</Text>
-        }
-      />
 
-      <TouchableOpacity style={styles.fab} onPress={handleCreateTask}>
-        <Text style={styles.fabText}>+</Text>
-      </TouchableOpacity>
+      {
+        isChange ? <View style={{ flex: 1 }}>
+          <Text style={{ textAlign: "center", marginTop: 10, marginBottom: 20 }}>" Your All - Task "</Text>
+          {
+            loading ? <ActivityIndicator size="large" color="blue" /> : <FlatList
+              data={mytask}
+              renderItem={renderTaskItem}
+              keyExtractor={(item) => item._id.toString()}
+              style={styles.taskList}
+              contentContainerStyle={styles.scrollContainer}
+              ListEmptyComponent={
+                <Text style={styles.noTaskText}>No tasks available</Text>
+              }
+            />
+          }
+
+
+          <TouchableOpacity style={styles.fab} onPress={handleCreateTask}>
+            <Text style={styles.fabText}>+</Text>
+          </TouchableOpacity>
+        </View> : <View style={{ flex: 1 }}><View style={styles.calendarContainer}>
+          <View style={styles.dateHeader}>
+            <Text style={styles.dateLabel}>Date</Text>
+            <View style={styles.dateSelector}>
+              <TouchableOpacity
+                onPress={() => changeMonth(subMonths(selectedDate, 1))}
+              >
+                <Icon
+                  name="chevron-left"
+                  size={20}
+                  color="#3B82F6"
+                  style={styles.icon}
+                />
+              </TouchableOpacity>
+              <Text style={styles.monthYearText}>
+                {format(selectedDate, "MMMM yyyy")}
+              </Text>
+              <TouchableOpacity
+                onPress={() => changeMonth(addMonths(selectedDate, 1))}
+              >
+                <Icon
+                  name="chevron-right"
+                  size={20}
+                  color="#3B82F6"
+                  style={styles.icon}
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+          <FlatList
+            data={monthDates}
+            renderItem={renderDateItem}
+            keyExtractor={(item) => item.toString()}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            initialNumToRender={5}
+            maxToRenderPerBatch={5}
+            windowSize={10}
+            contentContainerStyle={styles.dateStyle}
+          />
+        </View>
+          {/* <View style={{ alignItems: 'flex-end' }}>
+        <TouchableOpacity onPress={() => setRefresh(!refresh)}>
+          <Image
+            source={require("../../assets/images/skill/refresh.png")}
+            style={styles.refreshImage}
+          />
+        </TouchableOpacity>
+      </View> */}
+          {
+            loading ? <ActivityIndicator size="large" color="blue" /> : <FlatList
+              data={filteredTasks}
+              renderItem={renderTaskItem}
+              keyExtractor={(item) => item._id.toString()}
+              style={styles.taskList}
+              contentContainerStyle={styles.scrollContainer}
+              ListEmptyComponent={
+                <Text style={styles.noTaskText}>No tasks available</Text>
+              }
+            />
+          }
+
+          <TouchableOpacity style={styles.fab} onPress={handleCreateTask}>
+            <Text style={styles.fabText}>+</Text>
+          </TouchableOpacity></View>
+      }
+
       {/* <DateTimePickerModal
         isVisible={isDatePickerVisible}
         mode="date"
@@ -391,20 +389,26 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
-    marginTop: "7%",
+    marginTop: 30,
+    paddingHorizontal:20
+  },
+  headerLeft: {
+    flex: 1,
+    alignItems: "flex-start",
   },
   logo: {
-    height: 40,
+    height: 30,
+    width:70,
     resizeMode: "contain",
   },
   headerRight: {
-    flexDirection: "row",
-    alignItems: "center",
+    flex: 0,
+    alignItems: "flex-end",
   },
   notificationIcon: {
-    width: 25,
-    height: 25,
-    marginRight: 15,
+    height: 28,
+    width: 28,
+    resizeMode: "contain",
   },
   profileIcon: {
     width: 35,
@@ -428,6 +432,14 @@ const styles = StyleSheet.create({
     height: "100%",
     resizeMode: "cover",
     borderRadius: 8,
+  },
+  refreshImage: {
+    width: 30,
+    height: 20,
+    marginRight: 20,
+    marginBottom: 10,
+    padding: 15,
+    resizeMode: "contain",
   },
 
   calendarContainer: {
@@ -506,10 +518,14 @@ const styles = StyleSheet.create({
   },
   cardGradient: {
     flexDirection: "row",
-    padding: 15,
   },
   cardLeft: {
-    flex: 1,
+    marginRight: 16,
+  },
+  cardContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   cardTitle: {
     fontSize: 18,
@@ -526,10 +542,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   cardImage: {
-    width: "100%",
-    height: 80,
+    width: "90%",
+    height: 90,
     resizeMode: "cover",
-    borderRadius: 8,
+    borderRadius: 2,
   },
   scrollContainer: {
     paddingHorizontal: 16,
@@ -553,6 +569,62 @@ const styles = StyleSheet.create({
   fabText: {
     fontSize: 36,
     color: "white",
+  }, text: {
+    fontSize: 16,
+    marginHorizontal: 1,
+    fontWeight: "600"
+  },
+  card: {
+    borderRadius: 10,
+    overflow: 'hidden',
+    backgroundColor: "white",
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.9,
+    shadowRadius: 2,
+    marginBottom: 10,
+  },
+  cardGradient: {
+    padding: 15,
+    borderRadius: 10,
+  },
+  cardContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  cardLeft: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    marginBottom: 5,
+  },
+  cardLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    marginRight: 5,
+  },
+  cardValue: {
+    fontSize: 14,
+    color: '#666',
+  },
+  cardRight: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cardImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
   },
 });
 

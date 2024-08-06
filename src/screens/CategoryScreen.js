@@ -54,13 +54,13 @@ const CategoryScreen = ({ navigation }) => {
     {
       id: 7,
       image: require("../../assets/images/skill/Group 1.png"),
-      title: "Unknown",
+      title: "Plumber",
       checked: false,
     },
     {
       id: 8,
       image: require("../../assets/images/skill/Group.png"),
-      title: "Unknown",
+      title: "Other",
       checked: false,
     },
   ]);
@@ -74,7 +74,9 @@ const CategoryScreen = ({ navigation }) => {
 
   const handleCheckBoxClick = (id) => {
     const updatedSkills = skills.map((skill) =>
-      skill.id === id ? { ...skill, checked: !skill.checked } : { ...skill, checked: false }
+      skill.id === id
+        ? { ...skill, checked: !skill.checked }
+        : { ...skill, checked: false }
     );
     setSkills(updatedSkills);
   };
@@ -83,16 +85,15 @@ const CategoryScreen = ({ navigation }) => {
     if (!isContinueDisabled) {
       const selectedSkill = skills.find((skill) => skill.checked);
       navigation.navigate("Details Screen", {
-        skill: selectedSkill
+        skill: selectedSkill,
       });
     }
   };
 
-
   return (
     <View style={styles.container}>
-          <View style={styles.headingContainer}>
-          <TouchableOpacity
+      <View style={styles.headingContainer}>
+        <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
@@ -172,7 +173,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginVertical: 16,
     padding: 10,
-    color:"black"
+    color: "black",
   },
   scrollContainer: {
     flexGrow: 1,
@@ -197,7 +198,6 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     borderWidth: 1,
     borderColor: "#D3D3D3",
-    
   },
   gridItemSelected: {
     borderColor: "green",
@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
     paddingTop: 2,
     fontSize: 15,
     textAlign: "center",
-    color:"black"
+    color: "black",
   },
   checkboxContainer: {
     position: "absolute",

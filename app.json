@@ -4,7 +4,7 @@
     "slug": "chowkpe_Vender",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/chowkpe_icon.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
@@ -12,16 +12,34 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "usesIcloudStorage": true,
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "This app needs access to your location to show your current city and address.",
+        "NSCameraUsageDescription": "This app uses the camera.",
+        "NSPhotoLibraryUsageDescription": "This app needs access to your photo library."
+      },
+      "bundleIdentifier": "com.chowkpevender.app"
     },
     "android": {
+      "versionCode": 1,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      }
+        "foregroundImage": "./assets/chowkpe_icon.png",
+        "backgroundColor": "#ffffff",
+        "permissions": [
+          "ACCESS_FINE_LOCATION",
+          "ACCESS_COARSE_LOCATION"
+        ]
+      },
+      "package": "com.chowkpevender.app"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/chowkpe_icon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "46eb0e0f-ee14-422b-9f9f-3d53006ef032"
+      }
     }
   }
 }

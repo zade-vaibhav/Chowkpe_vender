@@ -1,12 +1,62 @@
-import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions, SafeAreaView } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useEffect, useState } from 'react';
+import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
 import { RFPercentage } from 'react-native-responsive-fontsize';
 
 const Welcome = ({navigation}) => {
+  const [isLoading,setIsloading] =useState(false)
 
   const handleGetStarted = ()=>{
     navigation.navigate('Login')
   }
+
+  useEffect(() => {
+    const checkTokens = async () => {
+       setIsloading(true)
+      const accessToken = await AsyncStorage.getItem('accessToken');
+      const refreshToken = await AsyncStorage.getItem('refreshToken');
+      console.log(accessToken,"  ",refreshToken)
+      if (!accessToken && !refreshToken) {
+        setIsloading(false)
+        navigation.navigate('Login')
+        return;
+      }
+
+      const response = await fetch('https://chowkpe-server.onrender.com/api/v1/vender/verifyVender', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ accessToken, refreshToken }),
+      });
+
+      const data = await response.json();
+
+      if(data?.message == "Invalid user"){
+        setIsloading(false)
+        navigation.replace('Login')
+        return;
+      }
+      if (data.success) {
+        setIsloading(false)
+        console.log(data)
+        await AsyncStorage.setItem('accessToken', data.accessToken);
+        if (data?.vender?.venderProfile === undefined) {
+          navigation.replace("Company Details");
+        } else {
+          navigation.replace("BottomNavigator");
+        }
+      } else {
+    
+        setIsloading(false)
+        Alert.alert('Session Expired', 'Please login again.');
+        navigation.replace("Login");
+      }
+    };
+
+    checkTokens();
+  }, [navigation]);
+
   return (
     <SafeAreaView style={styles.innerContainer}>
       <View style={styles.headingContainer}>
@@ -20,7 +70,12 @@ const Welcome = ({navigation}) => {
       />
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.button} onPress={handleGetStarted}>
-          <Text style={styles.buttonText}>Get Started</Text>
+          {
+            isLoading?<ActivityIndicator
+            size="small"
+            color="#fff"
+          />:<Text style={styles.buttonText}>Get Started</Text>
+          }
         </TouchableOpacity>
       </View>
     </SafeAreaView>

@@ -5,8 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 
 const WorkerProfileScreen = ({ route }) => {
     const navigation = useNavigation();
-    const { name, skills, rating, experience, image } = route.params;
-
+    const { profileData,show } = route.params;
     const handlePayment = () => {
         // navigation.navigate('ForkliftOperator');
     };
@@ -39,32 +38,36 @@ const WorkerProfileScreen = ({ route }) => {
 
             <View style={styles.profileContainer}>
                 <Image
-                    source={image || { uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT3flIHsvZtK3eU7tEnp-LSEjNznTZCn0dkcA&s' }}
+                    source={{ uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT3flIHsvZtK3eU7tEnp-LSEjNznTZCn0dkcA&s' }}
                     style={styles.profileImage}
                 />
                 <View style={styles.profileDetails}>
-                    <Text style={styles.profileName}>{name}</Text>
+                    <Text style={styles.profileName}>{profileData.profile.name}</Text>
                     <Text style={styles.profileTitle}>Cleaning Expert</Text>
                     <View style={styles.ratingContainer}>
-                        <Text style={styles.ratingText}>{rating}</Text>
+                        <Text style={styles.ratingText}>{3}</Text>
                         <View style={styles.ratingStars}>
-                            {renderStars(Math.floor(rating))}
+                            {renderStars(Math.floor(3))}
                         </View>
-                        <FontAwesome name="whatsapp" size={24} color="#25D366" style={styles.icon} />
-                        <FontAwesome name="phone" size={24} color="#3B82F6" style={styles.icon} />
+                        {
+                           show && <View style={{flexDirection:"row"}}>
+                           <FontAwesome name="whatsapp" size={24} color="#25D366" style={styles.icon} />
+                           <FontAwesome name="phone" size={24} color="#3B82F6" style={styles.icon} />
+                           </View>
+                           
+                        }
+                        
                     </View>
                 </View>
             </View>
-
-
             <View style={styles.infoContainer}>
                 <View style={styles.infoBox}>
-                    <Text style={styles.infoText}>259+</Text>
+                    <Text style={styles.infoText}>0</Text>
                     <Text style={styles.infoLabel}>Service Delivered</Text>
                 </View>
                 <View style={styles.line} />
                 <View style={styles.infoBox}>
-                    <Text style={styles.infoText}>{experience}+</Text>
+                    <Text style={styles.infoText}>0</Text>
                     <Text style={styles.infoLabel}>Years of Experience</Text>
                 </View>
             </View>
@@ -73,7 +76,7 @@ const WorkerProfileScreen = ({ route }) => {
             <View style={styles.skillsContainer}>
                 <Text style={styles.skillsTitle}>Skill Experience</Text>
                 <View style={styles.skillsBox}>
-                    {skills.split(', ').map((skill, index) => (
+                    {profileData.profile.skills.map((skill, index) => (
                         <View key={index} style={styles.skillItem}>
                             <Image source={require('../../assets/cleaner.png')} style={styles.skillImage} />
                             <Text style={styles.skillText}>{skill}</Text>
@@ -84,12 +87,12 @@ const WorkerProfileScreen = ({ route }) => {
 
 
             <View style={styles.footer}>
-                <TouchableOpacity
+                {/* <TouchableOpacity
                     style={styles.paymentContainer}
                     onPress={handlePayment}
                 >
                     <Text style={styles.paymentText}>Payment ₹170</Text>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
             </View>
         </View>
     );
@@ -188,9 +191,11 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     skillsBox: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
+        flexWrap:"wrap",
+        flexDirection:"row",
         marginTop: '5%',
+        justifyContent:"center",
+        alignItems:"center"
     },
     skillItem: {
         alignItems: 'center',
@@ -199,6 +204,7 @@ const styles = StyleSheet.create({
         borderColor: '#ccc',
         padding: 10,
         backgroundColor: '#fff',
+        margin:3,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.6,
